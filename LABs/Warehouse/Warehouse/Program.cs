@@ -1,4 +1,4 @@
-namespace Warehouse
+namespace UI
 {
     internal static class Program
     {

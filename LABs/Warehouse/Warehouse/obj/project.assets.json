@@ -14,9 +14,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\markld\\Desktop\\1\\ТУСУР\\2 курс\\DataBase\\DataBase\\LABs\\Warehouse\\Warehouse\\Warehouse.csproj",
-      "projectName": "Warehouse",
-      "projectPath": "C:\\Users\\markld\\Desktop\\1\\ТУСУР\\2 курс\\DataBase\\DataBase\\LABs\\Warehouse\\Warehouse\\Warehouse.csproj",
+      "projectUniqueName": "C:\\Users\\markld\\Desktop\\1\\ТУСУР\\2 курс\\DataBase\\DataBase\\LABs\\Warehouse\\Warehouse\\UI.csproj",
+      "projectName": "UI",
+      "projectPath": "C:\\Users\\markld\\Desktop\\1\\ТУСУР\\2 курс\\DataBase\\DataBase\\LABs\\Warehouse\\Warehouse\\UI.csproj",
       "packagesPath": "C:\\Users\\markld\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\markld\\Desktop\\1\\ТУСУР\\2 курс\\DataBase\\DataBase\\LABs\\Warehouse\\Warehouse\\obj\\",
       "projectStyle": "PackageReference",

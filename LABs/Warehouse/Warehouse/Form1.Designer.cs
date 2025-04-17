@@ -1,4 +1,4 @@
-﻿namespace Warehouse
+﻿namespace UI
 {
     partial class Form1
     {
