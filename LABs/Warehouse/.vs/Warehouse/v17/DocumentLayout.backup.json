@@ -19,18 +19,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Form1.cs [Design]",
+              "Title": "Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "DocumentMoniker": "C:\\Users\\markld\\Desktop\\1\\\u0422\u0423\u0421\u0423\u0420\\2 \u043A\u0443\u0440\u0441\\DataBase\\DataBase\\LABs\\Warehouse\\Warehouse\\Form1.cs",
               "RelativeDocumentMoniker": "Warehouse\\Form1.cs",
-              "ToolTip": "C:\\Users\\markld\\Desktop\\1\\\u0422\u0423\u0421\u0423\u0420\\2 \u043A\u0443\u0440\u0441\\DataBase\\DataBase\\LABs\\Warehouse\\Warehouse\\Form1.cs [Design]",
-              "RelativeToolTip": "Warehouse\\Form1.cs [Design]",
+              "ToolTip": "C:\\Users\\markld\\Desktop\\1\\\u0422\u0423\u0421\u0423\u0420\\2 \u043A\u0443\u0440\u0441\\DataBase\\DataBase\\LABs\\Warehouse\\Warehouse\\Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "RelativeToolTip": "Warehouse\\Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-16T19:36:24.225Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
             }
           ]
         }
