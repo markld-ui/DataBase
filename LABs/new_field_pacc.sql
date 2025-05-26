@@ -1,0 +1,1 @@
+ALTER TABLE product_accounting ADD COLUMN movement_status VARCHAR(50) DEFAULT 'В наличии';
