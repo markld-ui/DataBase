@@ -14,6 +14,27 @@ using Domain.Models;
 
 namespace UI
 {
+    /// <summary>
+    /// Форма для управления продуктами в системе.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Форма предоставляет интерфейс для просмотра, добавления, обновления, удаления и фильтрации
+    /// продуктов. Использует <see cref="DataGridView"/> для отображения списка продуктов,
+    /// <see cref="BindingNavigator"/> для навигации и элементы управления для ввода данных,
+    /// включая загрузку изображений.
+    /// </para>
+    /// <para>
+    /// Поддерживает фильтрацию по текстовому запросу и работу с типами продуктов через
+    /// перечисление <see cref="ProductType"/>.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var form = new ProductForm();
+    /// form.ShowDialog();
+    /// </code>
+    /// </example>
     public partial class ProductForm : Form
     {
         private readonly IProductRepository _productRepository;
@@ -25,6 +46,14 @@ namespace UI
         private CheckBox _checkBoxFind;
         private ToolStripButton _toolStripButtonReset;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="ProductForm"/>.
+        /// </summary>
+        /// <remarks>
+        /// Инициализирует компоненты формы, репозиторий продуктов, <see cref="BindingSource"/> и
+        /// <see cref="BindingNavigator"/>. Настраивает элементы управления навигатора, включая
+        /// кнопки поиска, сброса и фильтрации. Подписывается на событие добавления новой записи.
+        /// </remarks>
         public ProductForm()
         {
             InitializeComponent();
@@ -85,12 +114,28 @@ namespace UI
             };
         }
 
+        /// <summary>
+        /// Обрабатывает событие загрузки формы.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает методы для загрузки списка продуктов и типов продуктов.
+        /// </remarks>
         private void ProductForm_Load(object sender, EventArgs e)
         {
             LoadProducts();
             LoadProductTypes();
         }
 
+        /// <summary>
+        /// Загружает список продуктов и отображает их в таблице.
+        /// </summary>
+        /// <remarks>
+        /// Получает все продукты через <see cref="IProductRepository.GetAll"/> и привязывает их
+        /// к <see cref="DataGridView"/> через <see cref="BindingSource"/>. Настраивает заголовки
+        /// колонок и скрывает колонку с фотографией.
+        /// </remarks>
         private void LoadProducts()
         {
             try
@@ -112,6 +157,12 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Загружает типы продуктов в выпадающий список.
+        /// </summary>
+        /// <remarks>
+        /// Получает значения перечисления <see cref="ProductType"/> и привязывает их к <see cref="ComboBox"/>.
+        /// </remarks>
         private void LoadProductTypes()
         {
             try
@@ -125,6 +176,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения выбора строки в таблице.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Заполняет элементы управления данными выбранного продукта, включая название, срок годности,
+        /// тип продукта, статус активности и фотографию.
+        /// </remarks>
         private void dataGridViewProducts_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewProducts.SelectedRows.Count > 0)
@@ -153,6 +213,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Загрузить фото".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Открывает диалог выбора файла, позволяя пользователю загрузить изображение в формате
+        /// JPG, JPEG, PNG или BMP. Отображает выбранное изображение в <see cref="PictureBox"/>.
+        /// </remarks>
         private void btnUploadPhoto_Click(object sender, EventArgs e)
         {
             using (var openFileDialog = new OpenFileDialog())
@@ -165,6 +234,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Добавить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет ввод, создаёт новый продукт, добавляет его в базу данных, перезагружает
+        /// список продуктов и очищает поля ввода.
+        /// </remarks>
         private void btnAdd_Click(object sender, EventArgs e)
         {
             try
@@ -190,6 +268,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Обновить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор продукта и ввод, обновляет данные продукта в базе данных,
+        /// перезагружает список продуктов и очищает поля ввода.
+        /// </remarks>
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             try
@@ -217,6 +304,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Удалить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор продукта, запрашивает подтверждение, удаляет продукт из базы данных,
+        /// перезагружает список продуктов и очищает поля ввода.
+        /// </remarks>
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
@@ -240,6 +336,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Применяет фильтр к списку продуктов на основе текстового запроса.
+        /// </summary>
+        /// <param name="searchText">Текст для фильтрации.</param>
+        /// <remarks>
+        /// Получает отфильтрованные продукты через <see cref="IProductRepository.GetFiltered"/>,
+        /// обновляет таблицу и показывает сообщение, если ничего не найдено.
+        /// </remarks>
         private void ApplyFilter(string searchText)
         {
             try
@@ -265,11 +369,19 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Поиск".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет текстовое поле поиска и вызывает <see cref="ApplyFilter"/> с введённым текстом.
+        /// </remarks>
         private void ToolStripButtonFind_Click(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null)
             {
-                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.");
+                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -283,17 +395,33 @@ namespace UI
             ApplyFilter(searchText);
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Сброс".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Перезагружает список продуктов и очищает поле поиска.
+        /// </remarks>
         private void ToolStripButtonReset_Click(object sender, EventArgs e)
         {
             LoadProducts();
             _toolStripTextBoxFind.Text = null;
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения состояния флажка фильтрации.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// При включённом флажке применяет фильтр на основе текста поиска, при выключенном — сбрасывает данные.
+        /// </remarks>
         private void CheckBoxFind_CheckedChanged(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null || _checkBoxFind == null)
             {
-                MessageBox.Show("Ошибка: элементы не инициализированы.");
+                MessageBox.Show("Ошибка: элементы не инициализированы.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _checkBoxFind.Checked = false;
                 return;
             }
@@ -316,6 +444,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Проверяет корректность введённых данных.
+        /// </summary>
+        /// <returns><c>true</c>, если данные корректны; иначе <c>false</c>.</returns>
+        /// <remarks>
+        /// Проверяет наличие названия продукта и выбор типа продукта. Показывает сообщения об ошибках
+        /// при некорректных данных.
+        /// </remarks>
         private bool ValidateInput()
         {
             if (string.IsNullOrWhiteSpace(txtName.Text))
@@ -333,6 +469,13 @@ namespace UI
             return true;
         }
 
+        /// <summary>
+        /// Очищает поля ввода и сбрасывает выбранный продукт.
+        /// </summary>
+        /// <remarks>
+        /// Очищает текстовое поле названия, сбрасывает дату срока годности, тип продукта,
+        /// статус активности и изображение. Устанавливает <see cref="_selectedProduct"/> в null.
+        /// </remarks>
         private void ClearInputs()
         {
             txtName.Clear();
@@ -344,6 +487,14 @@ namespace UI
             _selectedProduct = null;
         }
 
+        /// <summary>
+        /// Преобразует изображение в массив байтов.
+        /// </summary>
+        /// <param name="image">Изображение для преобразования.</param>
+        /// <returns>Массив байтов, представляющий изображение.</returns>
+        /// <remarks>
+        /// Использует <see cref="MemoryStream"/> для сохранения изображения в исходном формате.
+        /// </remarks>
         private byte[] ImageToByteArray(System.Drawing.Image image)
         {
             using (var ms = new System.IO.MemoryStream())

@@ -12,10 +12,39 @@ using Infrastructure.Repositories;
 
 namespace UI
 {
+    /// <summary>
+    /// Форма для выполнения SQL-запросов к данным учёта продукции.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Форма предоставляет интерфейс для выполнения запросов на выборку, подзапросов и операций
+    /// изменения данных (DML). Поддерживает три вкладки: выборка (SELECT), подзапросы и DML
+    /// (вставка, обновление, удаление). Использует <see cref="DataGridView"/> для отображения
+    /// результатов запросов.
+    /// </para>
+    /// <para>
+    /// Валидация ввода реализована с визуальной обратной связью через изменение цвета текстовых полей
+    /// и всплывающие подсказки. Форма взаимодействует с базой данных через
+    /// <see cref="ISQLQueriesRepository"/>.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var form = new SQLQueries();
+    /// form.ShowDialog();
+    /// </code>
+    /// </example>
     public partial class SQLQueries : Form
     {
         private readonly ISQLQueriesRepository _sqlQueriesRepository;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="SQLQueries"/>.
+        /// </summary>
+        /// <remarks>
+        /// Инициализирует компоненты формы и репозиторий SQL-запросов. Вызывает методы для
+        /// обновления состояния элементов управления на всех вкладках.
+        /// </remarks>
         public SQLQueries()
         {
             InitializeComponent();
@@ -25,7 +54,18 @@ namespace UI
             UpdateDMLTabControlsState();
         }
 
-        // Валидация ввода
+        /// <summary>
+        /// Проверяет, является ли входная строка положительным целым числом.
+        /// </summary>
+        /// <param name="input">Входная строка для проверки.</param>
+        /// <param name="value">Выходное значение, если парсинг успешен.</param>
+        /// <param name="textBox">Текстовое поле для визуальной обратной связи.</param>
+        /// <param name="fieldName">Название поля для сообщений.</param>
+        /// <returns><c>true</c>, если строка является положительным целым числом; иначе <c>false</c>.</returns>
+        /// <remarks>
+        /// Изменяет цвет фона <paramref name="textBox"/> на розовый при ошибке и белый при успехе.
+        /// Устанавливает всплывающую подсказку с описанием ошибки или подсказкой.
+        /// </remarks>
         private bool ValidatePositiveInteger(string input, out int value, TextBox textBox, string fieldName)
         {
             value = 0;
@@ -46,6 +86,18 @@ namespace UI
             return true;
         }
 
+        /// <summary>
+        /// Проверяет, является ли входная строка датой в формате ДД.ММ.ГГГГ.
+        /// </summary>
+        /// <param name="input">Входная строка для проверки.</param>
+        /// <param name="value">Выходное значение, если парсинг успешен.</param>
+        /// <param name="textBox">Текстовое поле для визуальной обратной связи.</param>
+        /// <param name="fieldName">Название поля для сообщений.</param>
+        /// <returns><c>true</c>, если строка является корректной датой; иначе <c>false</c>.</returns>
+        /// <remarks>
+        /// Изменяет цвет фона <paramref name="textBox"/> на розовый при ошибке и белый при успехе.
+        /// Устанавливает всплывающую подсказку с описанием ошибки или подсказкой.
+        /// </remarks>
         private bool ValidateDate(string input, out DateTime value, TextBox textBox, string fieldName)
         {
             value = DateTime.MinValue;
@@ -66,6 +118,13 @@ namespace UI
             return true;
         }
 
+        /// <summary>
+        /// Проверяет все входные данные на всех вкладках.
+        /// </summary>
+        /// <remarks>
+        /// Вызывает методы валидации для вкладок выборки, подзапросов и DML, затем обновляет
+        /// состояние кнопок выполнения.
+        /// </remarks>
         private void ValidateAllInputs()
         {
             ValidateSelectTabInputs();
@@ -74,6 +133,13 @@ namespace UI
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Проверяет входные данные на вкладке выборки.
+        /// </summary>
+        /// <remarks>
+        /// Валидирует ID сотрудника для фильтрованной выборки и начальную дату для агрегирующей
+        /// выборки. Сбрасывает цвет фона полей, если соответствующий тип выборки не выбран.
+        /// </remarks>
         private void ValidateSelectTabInputs()
         {
             if (radioButtonFilteredSelect.Checked)
@@ -91,6 +157,13 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Проверяет входные данные на вкладке подзапросов.
+        /// </summary>
+        /// <remarks>
+        /// Валидирует ID поставки для коррелированного или некоррелированного подзапроса.
+        /// Сбрасывает цвет фона поля, если подзапрос не выбран.
+        /// </remarks>
         private void ValidateSubqueryTabInputs()
         {
             if (radioButtonCorrelatedSubquery.Checked || radioButtonNonCorrelatedSubquery.Checked)
@@ -103,6 +176,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Проверяет входные данные на вкладке DML.
+        /// </summary>
+        /// <remarks>
+        /// Валидирует поля в зависимости от выбранного действия (вставка, обновление, удаление).
+        /// Для вставки требует все поля, для обновления — ID и хотя бы одно поле, для удаления — только ID.
+        /// Сбрасывает цвет фона полей, если действие не выбрано.
+        /// </remarks>
         private void ValidateDMLTabInputs()
         {
             if (radioButtonInsert.Checked)
@@ -152,6 +233,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обновляет состояние кнопок выполнения запросов.
+        /// </summary>
+        /// <remarks>
+        /// Активирует или деактивирует кнопки <see cref="buttonExecuteSelect"/>,
+        /// <see cref="buttonExecuteSubquery"/> и <see cref="buttonExecuteDML"/> в зависимости
+        /// от валидности ввода и выбора типа запроса.
+        /// </remarks>
         private void UpdateExecuteButtonsState()
         {
             bool isSelectValid = true;
@@ -199,61 +288,142 @@ namespace UI
             buttonExecuteDML.Enabled = isDMLValid && (radioButtonInsert.Checked || radioButtonUpdate.Checked || radioButtonDelete.Checked);
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле ID сотрудника.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки выборки и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxEmployeeId_TextChanged(object sender, EventArgs e)
         {
             ValidateSelectTabInputs();
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле начальной даты.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки выборки и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxStartDate_TextChanged(object sender, EventArgs e)
         {
             ValidateSelectTabInputs();
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле ID поставки.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки подзапросов и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxSupplyId_TextChanged(object sender, EventArgs e)
         {
             ValidateSubqueryTabInputs();
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле ID записи.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки DML и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxId_TextChanged(object sender, EventArgs e)
         {
             ValidateDMLTabInputs();
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле даты учёта.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки DML и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxAccountingDate_TextChanged(object sender, EventArgs e)
         {
             ValidateDMLTabInputs();
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле количества.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки DML и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxQuantity_TextChanged(object sender, EventArgs e)
         {
             ValidateDMLTabInputs();
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле ID сотрудника для DML.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки DML и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxEmployeeIdInput_TextChanged(object sender, EventArgs e)
         {
             ValidateDMLTabInputs();
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле ID поставки для DML.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки DML и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxSupplyIdInput_TextChanged(object sender, EventArgs e)
         {
             ValidateDMLTabInputs();
             UpdateExecuteButtonsState();
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения текста в поле ID зоны хранения.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает валидацию вкладки DML и обновляет состояние кнопок.
+        /// </remarks>
         private void textBoxStorageId_TextChanged(object sender, EventArgs e)
         {
             ValidateDMLTabInputs();
             UpdateExecuteButtonsState();
         }
 
-        // 4.2.1 - Запросы на выборку
+        /// <summary>
+        /// Выполняет запрос на выборку данных и отображает результат.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Выполняет один из четырёх типов выборки (простая, фильтрованная, многотабличная,
+        /// агрегирующая) в зависимости от выбранного переключателя. Показывает результат в
+        /// <see cref="dataGridViewSelect"/>. Локализует заголовки столбцов и сбрасывает форму.
+        /// </remarks>
         private void buttonExecuteSelect_Click(object sender, EventArgs e)
         {
             try
@@ -298,30 +468,69 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя простой выборки.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки выборки и вызывает валидацию.
+        /// </remarks>
         private void radioButtonSimpleSelect_CheckedChanged(object sender, EventArgs e)
         {
             UpdateSelectTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя фильтрованной выборки.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки выборки и вызывает валидацию.
+        /// </remarks>
         private void radioButtonFilteredSelect_CheckedChanged(object sender, EventArgs e)
         {
             UpdateSelectTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя многотабличной выборки.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки выборки и вызывает валидацию.
+        /// </remarks>
         private void radioButtonMultiTableSelect_CheckedChanged(object sender, EventArgs e)
         {
             UpdateSelectTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя агрегирующей выборки.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки выборки и вызывает валидацию.
+        /// </remarks>
         private void radioButtonAggregateSelect_CheckedChanged(object sender, EventArgs e)
         {
             UpdateSelectTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обновляет состояние элементов управления на вкладке выборки.
+        /// </summary>
+        /// <remarks>
+        /// Активирует или деактивирует поля ввода в зависимости от выбранного типа выборки.
+        /// Очищает неиспользуемые поля.
+        /// </remarks>
         private void UpdateSelectTabControlsState()
         {
             textBoxEmployeeId.Enabled = radioButtonFilteredSelect.Checked;
@@ -332,6 +541,13 @@ namespace UI
                 textBoxStartDate.Text = string.Empty;
         }
 
+        /// <summary>
+        /// Сбрасывает форму вкладки выборки.
+        /// </summary>
+        /// <remarks>
+        /// Очищает поля ввода, сбрасывает переключатели, обновляет состояние элементов
+        /// управления и вызывает валидацию.
+        /// </remarks>
         private void ResetSelectForm()
         {
             textBoxEmployeeId.Text = string.Empty;
@@ -344,7 +560,16 @@ namespace UI
             ValidateAllInputs();
         }
 
-        // 4.2.2 - Подзапросы
+        /// <summary>
+        /// Выполняет подзапрос и отображает результат.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Выполняет коррелированный или некоррелированный подзапрос в зависимости от выбранного
+        /// переключателя. Показывает результат в <see cref="dataGridViewSubquery"/>. Локализует
+        /// заголовки столбцов и сбрасывает форму.
+        /// </remarks>
         private void buttonExecuteSubquery_Click(object sender, EventArgs e)
         {
             try
@@ -381,18 +606,41 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя коррелированного подзапроса.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки подзапросов и вызывает валидацию.
+        /// </remarks>
         private void radioButtonCorrelatedSubquery_CheckedChanged(object sender, EventArgs e)
         {
             UpdateSubqueryTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя некоррелированного подзапроса.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки подзапросов и вызывает валидацию.
+        /// </remarks>
         private void radioButtonNonCorrelatedSubquery_CheckedChanged(object sender, EventArgs e)
         {
             UpdateSubqueryTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обновляет состояние элементов управления на вкладке подзапросов.
+        /// </summary>
+        /// <remarks>
+        /// Активирует или деактивирует поле ввода ID поставки в зависимости от выбранного типа
+        /// подзапроса. Очищает поле, если подзапрос не выбран.
+        /// </remarks>
         private void UpdateSubqueryTabControlsState()
         {
             textBoxSupplyId.Enabled = radioButtonCorrelatedSubquery.Checked || radioButtonNonCorrelatedSubquery.Checked;
@@ -400,6 +648,13 @@ namespace UI
                 textBoxSupplyId.Text = string.Empty;
         }
 
+        /// <summary>
+        /// Сбрасывает форму вкладки подзапросов.
+        /// </summary>
+        /// <remarks>
+        /// Очищает поле ввода, сбрасывает переключатели, обновляет состояние элементов
+        /// управления и вызывает валидацию.
+        /// </remarks>
         private void ResetSubqueryForm()
         {
             textBoxSupplyId.Text = string.Empty;
@@ -409,7 +664,16 @@ namespace UI
             ValidateAllInputs();
         }
 
-        // 4.2.3 - Изменение данных
+        /// <summary>
+        /// Выполняет операцию DML (вставка, обновление, удаление).
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Выполняет выбранную операцию DML, валидирует ввод, проверяет существование записи
+        /// (для обновления и удаления). Показывает сообщение об успехе и сбрасывает форму.
+        /// Обновляет таблицу результатов.
+        /// </remarks>
         private void buttonExecuteDML_Click(object sender, EventArgs e)
         {
             try
@@ -514,6 +778,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обновляет таблицу результатов на вкладке DML.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает <see cref="RefreshDMLTable"/> для обновления данных в
+        /// <see cref="dataGridViewDML"/>.
+        /// </remarks>
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
             try
@@ -526,24 +799,55 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя вставки.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки DML и вызывает валидацию.
+        /// </remarks>
         private void radioButtonInsert_CheckedChanged(object sender, EventArgs e)
         {
             UpdateDMLTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя обновления.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки DML и вызывает валидацию.
+        /// </remarks>
         private void radioButtonUpdate_CheckedChanged(object sender, EventArgs e)
         {
             UpdateDMLTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обрабатывает изменение состояния переключателя удаления.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Обновляет состояние элементов управления вкладки DML и вызывает валидацию.
+        /// </remarks>
         private void radioButtonDelete_CheckedChanged(object sender, EventArgs e)
         {
             UpdateDMLTabControlsState();
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обновляет состояние элементов управления на вкладке DML.
+        /// </summary>
+        /// <remarks>
+        /// Активирует или деактивирует поля ввода в зависимости от выбранного действия DML.
+        /// Очищает неиспользуемые поля.
+        /// </remarks>
         private void UpdateDMLTabControlsState()
         {
             textBoxId.Enabled = radioButtonUpdate.Checked || radioButtonDelete.Checked;
@@ -565,6 +869,13 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Сбрасывает форму вкладки DML.
+        /// </summary>
+        /// <remarks>
+        /// Очищает все поля ввода, сбрасывает переключатели, обновляет состояние элементов
+        /// управления и вызывает валидацию.
+        /// </remarks>
         private void ResetDMLForm()
         {
             textBoxId.Text = string.Empty;
@@ -580,6 +891,13 @@ namespace UI
             ValidateAllInputs();
         }
 
+        /// <summary>
+        /// Обновляет таблицу результатов на вкладке DML.
+        /// </summary>
+        /// <remarks>
+        /// Загружает все записи через <see cref="ISQLQueriesRepository.GetAllRecords"/>,
+        /// локализует заголовки столбцов и показывает сообщение, если записей нет.
+        /// </remarks>
         private void RefreshDMLTable()
         {
             dataGridViewDML.DataSource = _sqlQueriesRepository.GetAllRecords();
@@ -590,6 +908,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Локализует заголовки столбцов таблицы.
+        /// </summary>
+        /// <param name="dataGridView">Таблица для локализации.</param>
+        /// <remarks>
+        /// Изменяет заголовки столбцов в <see cref="DataGridView"/> на русскоязычные названия
+        /// в зависимости от имени столбца.
+        /// </remarks>
         private void LocalizeDataGridViewColumns(DataGridView dataGridView)
         {
             foreach (DataGridViewColumn column in dataGridView.Columns)
@@ -625,4 +951,3 @@ namespace UI
         }
     }
 }
-

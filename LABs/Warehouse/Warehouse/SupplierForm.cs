@@ -12,6 +12,27 @@ using Domain.Models;
 
 namespace UI
 {
+    /// <summary>
+    /// Форма для управления поставщиками в системе.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Форма предоставляет интерфейс для просмотра, добавления, обновления, удаления и фильтрации
+    /// поставщиков. Использует <see cref="DataGridView"/> для отображения списка поставщиков,
+    /// <see cref="BindingNavigator"/> для навигации и элементы управления для ввода данных.
+    /// </para>
+    /// <para>
+    /// Данные поставщиков загружаются из репозитория <see cref="ISupplierRepository"/>. Форма
+    /// поддерживает фильтрацию по текстовому запросу и минимальную валидацию ввода (проверка
+    /// названия компании).
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var form = new SupplierForm();
+    /// form.ShowDialog();
+    /// </code>
+    /// </example>
     public partial class SupplierForm : Form
     {
         private readonly ISupplierRepository _supplierRepository;
@@ -23,6 +44,14 @@ namespace UI
         private CheckBox _checkBoxFind;
         private ToolStripButton _toolStripButtonReset;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="SupplierForm"/>.
+        /// </summary>
+        /// <remarks>
+        /// Инициализирует компоненты формы, репозиторий, <see cref="BindingSource"/> и
+        /// <see cref="BindingNavigator"/>. Настраивает элементы управления навигатора, включая
+        /// кнопки поиска, сброса и фильтрации. Подписывается на событие добавления новой записи.
+        /// </remarks>
         public SupplierForm()
         {
             InitializeComponent();
@@ -83,11 +112,27 @@ namespace UI
             };
         }
 
+        /// <summary>
+        /// Обрабатывает событие загрузки формы.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает метод для загрузки списка поставщиков.
+        /// </remarks>
         private void SupplierForm_Load(object sender, EventArgs e)
         {
             LoadSuppliers();
         }
 
+        /// <summary>
+        /// Загружает список поставщиков и отображает их в таблице.
+        /// </summary>
+        /// <remarks>
+        /// Получает все записи поставщиков через <see cref="ISupplierRepository.GetAll"/> и
+        /// привязывает их к <see cref="DataGridView"/> через <see cref="BindingSource"/>.
+        /// Настраивает заголовки колонок.
+        /// </remarks>
         private void LoadSuppliers()
         {
             try
@@ -108,6 +153,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения выбора строки в таблице.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Заполняет элементы управления данными выбранного поставщика, включая название
+        /// компании, контактное лицо, телефон и адрес.
+        /// </remarks>
         private void dataGridViewSuppliers_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewSuppliers.SelectedRows.Count > 0)
@@ -124,6 +178,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Добавить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет ввод, создаёт нового поставщика, добавляет его в базу данных,
+        /// перезагружает список поставщиков и очищает поля ввода.
+        /// </remarks>
         private void btnAdd_Click(object sender, EventArgs e)
         {
             try
@@ -148,6 +211,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Обновить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор поставщика и ввод, обновляет данные поставщика в базе данных,
+        /// перезагружает список поставщиков и очищает поля ввода.
+        /// </remarks>
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             try
@@ -175,6 +247,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Удалить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор поставщика, запрашивает подтверждение, удаляет поставщика из базы
+        /// данных, перезагружает список поставщиков и очищает поля ввода.
+        /// </remarks>
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
@@ -198,6 +279,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Применяет фильтр к списку поставщиков на основе текстового запроса.
+        /// </summary>
+        /// <param name="searchText">Текст для фильтрации.</param>
+        /// <remarks>
+        /// Получает отфильтрованные записи через <see cref="ISupplierRepository.GetFiltered"/>,
+        /// обновляет таблицу. Показывает сообщение, если ничего не найдено, и перезагружает
+        /// полный список.
+        /// </remarks>
         private void ApplyFilter(string searchText)
         {
             try
@@ -223,11 +313,19 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Поиск".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет текстовое поле поиска и вызывает <see cref="ApplyFilter"/> с введённым текстом.
+        /// </remarks>
         private void ToolStripButtonFind_Click(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null)
             {
-                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.");
+                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -241,17 +339,33 @@ namespace UI
             ApplyFilter(searchText);
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Сброс".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Перезагружает список поставщиков и очищает поле поиска.
+        /// </remarks>
         private void ToolStripButtonReset_Click(object sender, EventArgs e)
         {
             LoadSuppliers();
             _toolStripTextBoxFind.Text = null;
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения состояния флажка фильтрации.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// При включённом флажке применяет фильтр на основе текста поиска, при выключенном — сбрасывает данные.
+        /// </remarks>
         private void CheckBoxFind_CheckedChanged(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null || _checkBoxFind == null)
             {
-                MessageBox.Show("Ошибка: элементы не инициализированы.");
+                MessageBox.Show("Ошибка: элементы не инициализированы.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _checkBoxFind.Checked = false;
                 return;
             }
@@ -274,6 +388,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Проверяет корректность введённых данных.
+        /// </summary>
+        /// <returns><c>true</c>, если данные корректны; иначе <c>false</c>.</returns>
+        /// <remarks>
+        /// Проверяет только наличие названия компании. Другие поля (контактное лицо, телефон,
+        /// адрес) считаются необязательными.
+        /// </remarks>
         private bool ValidateInput()
         {
             if (string.IsNullOrWhiteSpace(txtCompanyName.Text))
@@ -285,6 +407,13 @@ namespace UI
             return true;
         }
 
+        /// <summary>
+        /// Очищает поля ввода и сбрасывает выбранного поставщика.
+        /// </summary>
+        /// <remarks>
+        /// Очищает текстовые поля для названия компании, контактного лица, телефона и адреса.
+        /// Устанавливает <see cref="_selectedSupplier"/> в null.
+        /// </remarks>
         private void ClearInputs()
         {
             txtCompanyName.Clear();

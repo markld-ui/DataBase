@@ -12,6 +12,26 @@ using Domain.Models;
 
 namespace UI
 {
+    /// <summary>
+    /// Форма для управления поставками в системе.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Форма предоставляет интерфейс для просмотра, добавления, обновления, удаления и фильтрации
+    /// поставок. Использует <see cref="DataGridView"/> для отображения списка поставок,
+    /// <see cref="BindingNavigator"/> для навигации и элементы управления для ввода данных.
+    /// </para>
+    /// <para>
+    /// Данные обогащаются названиями продуктов и поставщиков через класс <see cref="SupplyView"/>.
+    /// Поддерживает фильтрацию по текстовому запросу и валидацию ввода (продукт, поставщик, количество).
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var form = new SupplyForm();
+    /// form.ShowDialog();
+    /// </code>
+    /// </example>
     public partial class SupplyForm : Form
     {
         private readonly ISupplyRepository _supplyRepository;
@@ -28,6 +48,14 @@ namespace UI
         private Dictionary<int, string> _productNames;
         private Dictionary<int, string> _supplierNames;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="SupplyForm"/>.
+        /// </summary>
+        /// <remarks>
+        /// Инициализирует компоненты формы, репозитории, <see cref="BindingSource"/> и
+        /// <see cref="BindingNavigator"/>. Настраивает элементы управления навигатора, включая
+        /// кнопки поиска, сброса и фильтрации.
+        /// </remarks>
         public SupplyForm()
         {
             InitializeComponent();
@@ -84,6 +112,14 @@ namespace UI
             _bindingNavigator.Items.Add(checkBoxHost);
         }
 
+        /// <summary>
+        /// Обрабатывает событие загрузки формы.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает методы для загрузки поставок, продуктов и поставщиков.
+        /// </remarks>
         private void SupplyForm_Load(object sender, EventArgs e)
         {
             LoadSupplies();
@@ -91,6 +127,17 @@ namespace UI
             LoadSuppliers();
         }
 
+        /// <summary>
+        /// Загружает список поставок и отображает их в таблице.
+        /// </summary>
+        /// <remarks>
+        /// Получает все поставки через <see cref="ISupplyRepository.GetAll"/>, названия продуктов
+        /// через <see cref="IProductRepository.GetAll"/> и названия поставщиков через
+        /// <see cref="ISupplierRepository.GetAll"/>. Обогащает данные названиями с помощью
+        /// <see cref="SupplyView"/> и привязывает их к <see cref="DataGridView"/> через
+        /// <see cref="BindingSource"/>. Настраивает заголовки колонок и обработчик добавления
+        /// новой записи.
+        /// </remarks>
         private void LoadSupplies()
         {
             try
@@ -132,6 +179,13 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Загружает список продуктов в выпадающий список.
+        /// </summary>
+        /// <remarks>
+        /// Получает данные через <see cref="IProductRepository.GetAll"/> и привязывает их
+        /// к <see cref="ComboBox"/> с отображением имени продукта и значением ID.
+        /// </remarks>
         private void LoadProducts()
         {
             try
@@ -147,6 +201,13 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Загружает список поставщиков в выпадающий список.
+        /// </summary>
+        /// <remarks>
+        /// Получает данные через <see cref="ISupplierRepository.GetAll"/> и привязывает их
+        /// к <see cref="ComboBox"/> с отображением названия компании и значением ID.
+        /// </remarks>
         private void LoadSuppliers()
         {
             try
@@ -162,6 +223,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения выбора строки в таблице.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Заполняет элементы управления данными выбранной поставки, включая продукт,
+        /// поставщика, дату поставки и количество.
+        /// </remarks>
         private void dataGridViewSupplies_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewSupplies.SelectedRows.Count > 0)
@@ -182,6 +252,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Добавить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет ввод, создаёт новую поставку, добавляет её в базу данных,
+        /// перезагружает список поставок и очищает поля ввода.
+        /// </remarks>
         private void btnAdd_Click(object sender, EventArgs e)
         {
             try
@@ -206,6 +285,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Обновить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор поставки и ввод, обновляет данные поставки в базе данных,
+        /// перезагружает список поставок и очищает поля ввода.
+        /// </remarks>
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             try
@@ -233,6 +321,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Удалить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор поставки, запрашивает подтверждение, удаляет поставку из базы данных,
+        /// перезагружает список поставок и очищает поля ввода.
+        /// </remarks>
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
@@ -256,6 +353,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Применяет фильтр к списку поставок на основе текстового запроса.
+        /// </summary>
+        /// <param name="searchText">Текст для фильтрации.</param>
+        /// <remarks>
+        /// Получает отфильтрованные поставки через <see cref="ISupplyRepository.GetFiltered"/>,
+        /// обогащает их названиями продуктов и поставщиков и обновляет таблицу. Показывает
+        /// сообщение, если ничего не найдено, и перезагружает полный список.
+        /// </remarks>
         private void ApplyFilter(string searchText)
         {
             try
@@ -293,11 +399,19 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Поиск".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет текстовое поле поиска и вызывает <see cref="ApplyFilter"/> с введённым текстом.
+        /// </remarks>
         private void ToolStripButtonFind_Click(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null)
             {
-                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.");
+                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -311,17 +425,33 @@ namespace UI
             ApplyFilter(searchText);
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Сброс".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Перезагружает список поставок и очищает поле поиска.
+        /// </remarks>
         private void ToolStripButtonReset_Click(object sender, EventArgs e)
         {
             LoadSupplies();
             _toolStripTextBoxFind.Text = null;
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения состояния флажка фильтрации.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// При включённом флажке применяет фильтр на основе текста поиска, при выключенном — сбрасывает данные.
+        /// </remarks>
         private void CheckBoxFind_CheckedChanged(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null || _checkBoxFind == null)
             {
-                MessageBox.Show("Ошибка: элементы не инициализированы.");
+                MessageBox.Show("Ошибка: элементы не инициализированы.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _checkBoxFind.Checked = false;
                 return;
             }
@@ -344,6 +474,13 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Проверяет корректность введённых данных.
+        /// </summary>
+        /// <returns><c>true</c>, если данные корректны; иначе <c>false</c>.</returns>
+        /// <remarks>
+        /// Проверяет выбор продукта, поставщика и корректность количества (положительное число).
+        /// </remarks>
         private bool ValidateInput()
         {
             if (cmbProduct.SelectedValue == null)
@@ -367,6 +504,14 @@ namespace UI
             return true;
         }
 
+        /// <summary>
+        /// Очищает поля ввода и сбрасывает выбранную поставку.
+        /// </summary>
+        /// <remarks>
+        /// Сбрасывает выпадающие списки продукта и поставщика, устанавливает текущую дату
+        /// для поля даты поставки, очищает поле количества и устанавливает
+        /// <see cref="_selectedSupply"/> в null.
+        /// </remarks>
         private void ClearInputs()
         {
             cmbProduct.SelectedIndex = -1;
@@ -376,13 +521,37 @@ namespace UI
             _selectedSupply = null;
         }
 
-        // Временный класс для поддержки BindingNavigator
+        /// <summary>
+        /// Представляет модель представления для отображения данных поставок в таблице.
+        /// </summary>
+        /// <remarks>
+        /// Класс обогащает данные <see cref="Supply"/> названиями продукта и поставщика вместо их ID.
+        /// </remarks>
         private class SupplyView
         {
+            /// <summary>
+            /// Получает или задаёт идентификатор поставки.
+            /// </summary>
             public int SupplyId { get; set; }
+
+            /// <summary>
+            /// Получает или задаёт название продукта.
+            /// </summary>
             public string ProductName { get; set; }
+
+            /// <summary>
+            /// Получает или задаёт название поставщика.
+            /// </summary>
             public string SupplierName { get; set; }
+
+            /// <summary>
+            /// Получает или задаёт дату поставки.
+            /// </summary>
             public DateTime SupplyDate { get; set; }
+
+            /// <summary>
+            /// Получает или задаёт количество продукции в поставке.
+            /// </summary>
             public int Quantity { get; set; }
         }
     }

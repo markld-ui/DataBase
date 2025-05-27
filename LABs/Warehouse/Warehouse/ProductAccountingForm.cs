@@ -12,6 +12,27 @@ using Domain.Models;
 
 namespace UI
 {
+    /// <summary>
+    /// Форма для управления учётом продукции в системе.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Форма предоставляет интерфейс для просмотра, добавления, обновления, удаления и фильтрации
+    /// записей учёта продукции. Использует <see cref="DataGridView"/> для отображения данных,
+    /// <see cref="BindingNavigator"/> для навигации и элементы управления для ввода данных.
+    /// </para>
+    /// <para>
+    /// Данные обогащаются дополнительной информацией (например, имя сотрудника, название зоны хранения)
+    /// через класс <see cref="ProductAccountingView"/>. Поддерживает фильтрацию по текстовому запросу
+    /// и обновление статуса движения через выпадающий список.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var form = new ProductAccountingForm();
+    /// form.ShowDialog();
+    /// </code>
+    /// </example>
     public partial class ProductAccountingForm : Form
     {
         private readonly IProductAccountingRepository _productAccountingRepository;
@@ -27,6 +48,14 @@ namespace UI
         private ToolStripButton _toolStripButtonReset;
         private List<string> _movementStatuses;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="ProductAccountingForm"/>.
+        /// </summary>
+        /// <remarks>
+        /// Инициализирует компоненты формы, репозитории, <see cref="BindingSource"/>, <see cref="BindingNavigator"/>
+        /// и список статусов движения. Настраивает элементы управления навигатора, включая кнопки поиска,
+        /// сброса и фильтрации.
+        /// </remarks>
         public ProductAccountingForm()
         {
             InitializeComponent();
@@ -91,6 +120,15 @@ namespace UI
             };
         }
 
+        /// <summary>
+        /// Обрабатывает событие загрузки формы.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает методы для загрузки данных учёта продукции, поставок, сотрудников и зон хранения.
+        /// Отключает элемент управления для даты последнего движения.
+        /// </remarks>
         private void ProductAccountingForm_Load(object sender, EventArgs e)
         {
             LoadProductAccountings();
@@ -100,6 +138,14 @@ namespace UI
             dtpLastMovementDate.Enabled = false;
         }
 
+        /// <summary>
+        /// Загружает данные учёта продукции и отображает их в таблице.
+        /// </summary>
+        /// <remarks>
+        /// Получает все записи учёта продукции через <see cref="IProductAccountingRepository.GetAll"/>,
+        /// обогащает их дополнительной информацией (имя сотрудника, название зоны хранения, вычисляемые поля)
+        /// и привязывает к <see cref="DataGridView"/> через <see cref="BindingSource"/>.
+        /// </remarks>
         private void LoadProductAccountings()
         {
             try
@@ -245,6 +291,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения состояния текущей ячейки в таблице.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Применяет изменения в ячейке, если она помечена как "грязная".
+        /// </remarks>
         private void DataGridViewProductAccountings_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {
             if (dataGridViewProductAccountings.IsCurrentCellDirty)
@@ -253,6 +307,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения значения ячейки в таблице.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события, содержащие индексы строки и столбца.</param>
+        /// <remarks>
+        /// Обновляет статус движения в базе данных при изменении значения в столбце <see cref="MovementStatus"/>.
+        /// При ошибке показывает сообщение и перезагружает данные.
+        /// </remarks>
         private void DataGridViewProductAccountings_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == dataGridViewProductAccountings.Columns["MovementStatus"].Index && e.RowIndex >= 0)
@@ -278,6 +341,12 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Загружает список поставок в выпадающий список.
+        /// </summary>
+        /// <remarks>
+        /// Получает данные через <see cref="ISupplyRepository.GetAll"/> и привязывает их к <see cref="ComboBox"/>.
+        /// </remarks>
         private void LoadSupplies()
         {
             try
@@ -293,6 +362,12 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Загружает список сотрудников в выпадающий список.
+        /// </summary>
+        /// <remarks>
+        /// Получает данные через <see cref="IEmployeeRepository.GetAll"/> и привязывает их к <see cref="ComboBox"/>.
+        /// </remarks>
         private void LoadEmployees()
         {
             try
@@ -308,6 +383,12 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Загружает список зон хранения в выпадающий список.
+        /// </summary>
+        /// <remarks>
+        /// Получает данные через <see cref="IStorageZoneRepository.GetAll"/> и привязывает их к <see cref="ComboBox"/>.
+        /// </remarks>
         private void LoadStorageZones()
         {
             try
@@ -323,6 +404,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения выбора строки в таблице.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Заполняет элементы управления данными выбранной записи учёта продукции.
+        /// </remarks>
         private void dataGridViewProductAccountings_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewProductAccountings.SelectedRows.Count > 0)
@@ -350,11 +439,28 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения состояния флажка для даты последнего движения.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Включает или отключает элемент управления <see cref="dtpLastMovementDate"/> в зависимости от состояния флажка.
+        /// </remarks>
         private void chkLastMovementDate_CheckedChanged(object sender, EventArgs e)
         {
             dtpLastMovementDate.Enabled = chkLastMovementDate.Checked;
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Добавить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет ввод, создаёт новую запись учёта продукции и добавляет её в базу данных.
+        /// Перезагружает данные и очищает поля ввода.
+        /// </remarks>
         private void btnAdd_Click(object sender, EventArgs e)
         {
             try
@@ -382,6 +488,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Обновить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор записи, валидирует ввод, обновляет запись в базе данных,
+        /// перезагружает данные и очищает поля ввода.
+        /// </remarks>
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             try
@@ -411,6 +526,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Удалить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор записи, запрашивает подтверждение, удаляет запись из базы данных,
+        /// перезагружает данные и очищает поля ввода.
+        /// </remarks>
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
@@ -434,6 +558,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Применяет фильтр к данным учёта продукции на основе текстового запроса.
+        /// </summary>
+        /// <param name="searchText">Текст для фильтрации.</param>
+        /// <remarks>
+        /// Получает отфильтрованные данные через <see cref="IProductAccountingRepository.GetFiltered"/>,
+        /// обогащает их и обновляет таблицу. Показывает сообщение, если ничего не найдено.
+        /// </remarks>
         private void ApplyFilter(string searchText)
         {
             try
@@ -481,11 +613,19 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Поиск".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет текстовое поле поиска и вызывает <see cref="ApplyFilter"/> с введённым текстом.
+        /// </remarks>
         private void ToolStripButtonFind_Click(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null)
             {
-                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.");
+                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -499,17 +639,33 @@ namespace UI
             ApplyFilter(searchText);
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Сброс".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Перезагружает данные и очищает поле поиска.
+        /// </remarks>
         private void ToolStripButtonReset_Click(object sender, EventArgs e)
         {
             LoadProductAccountings();
-            _toolStripTextBoxFind.Text = null;
+            _toolStripTextBoxFind.Text = string.Empty;
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения состояния флажка фильтрации.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// При включённом флажке применяет фильтр на основе текста поиска, при выключенном — сбрасывает данные.
+        /// </remarks>
         private void CheckBoxFind_CheckedChanged(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null || _checkBoxFind == null)
             {
-                MessageBox.Show("Ошибка: элементы не инициализированы.");
+                MessageBox.Show("Ошибка: элементы не инициализированы.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _checkBoxFind.Checked = false;
                 return;
             }
@@ -532,6 +688,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Проверяет корректность введённых данных.
+        /// </summary>
+        /// <returns><c>true</c>, если данные корректны; иначе <c>false</c>.</returns>
+        /// <remarks>
+        /// Проверяет выбор поставки, сотрудника, зоны хранения и корректность количества.
+        /// Показывает сообщения об ошибках при некорректных данных.
+        /// </remarks>
         private bool ValidateInput()
         {
             if (cmbSupply.SelectedValue == null)
@@ -561,6 +725,13 @@ namespace UI
             return true;
         }
 
+        /// <summary>
+        /// Очищает поля ввода и сбрасывает выбранную запись.
+        /// </summary>
+        /// <remarks>
+        /// Сбрасывает выпадающие списки, даты, количество и флажок даты последнего движения.
+        /// Устанавливает <see cref="_selectedProductAccounting"/> в null.
+        /// </remarks>
         private void ClearInputs()
         {
             cmbSupply.SelectedIndex = -1;
@@ -574,23 +745,85 @@ namespace UI
         }
     }
 
-
+    /// <summary>
+    /// Представляет модель представления для отображения данных учёта продукции в таблице.
+    /// </summary>
+    /// <remarks>
+    /// Класс обогащает данные <see cref="ProductAccounting"/> дополнительной информацией
+    /// (например, имя сотрудника, название зоны хранения) и вычисляемыми полями
+    /// (например, дни с даты учёта, недавнее движение).
+    /// </remarks>
     public class ProductAccountingView
     {
+        /// <summary>
+        /// Получает или задаёт идентификатор записи учёта.
+        /// </summary>
         public int ProductAccId { get; set; }
-        public string SupplyId { get; set; }
-        public string EmployeeId { get; set; }
-        public string EmployeeName { get; set; }
-        public string EmployeePosition { get; set; } // Подстановочная колонка
-        public string StorageId { get; set; }
-        public string StorageZone { get; set; }
-        public DateTime AccountingDate { get; set; }
-        public int Quantity { get; set; }
-        public string LastMovementDate { get; set; }
-        public int DaysSinceAccounting { get; set; } // Вычисляемая колонка
-        public string IsRecentMovement { get; set; } // Вычисляемая колонка
-        public string MovementStatus { get; set; } // Новое поле для выпадающего списка
 
+        /// <summary>
+        /// Получает или задаёт идентификатор поставки (строковое представление).
+        /// </summary>
+        public string SupplyId { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт идентификатор сотрудника (строковое представление).
+        /// </summary>
+        public string EmployeeId { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт имя сотрудника.
+        /// </summary>
+        public string EmployeeName { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт должность сотрудника.
+        /// </summary>
+        public string EmployeePosition { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт идентификатор зоны хранения (строковое представление).
+        /// </summary>
+        public string StorageId { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт название зоны хранения.
+        /// </summary>
+        public string StorageZone { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт дату учёта.
+        /// </summary>
+        public DateTime AccountingDate { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт количество продукции.
+        /// </summary>
+        public int Quantity { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт дату последнего движения (строковое представление).
+        /// </summary>
+        public string LastMovementDate { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт количество дней с даты учёта.
+        /// </summary>
+        public int DaysSinceAccounting { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт признак недавнего движения ("Да" или "Нет").
+        /// </summary>
+        public string IsRecentMovement { get; set; }
+
+        /// <summary>
+        /// Получает или задаёт статус движения.
+        /// </summary>
+        public string MovementStatus { get; set; }
+
+        /// <summary>
+        /// Возвращает строковое представление объекта.
+        /// </summary>
+        /// <returns>Строка, содержащая ID учёта, имя сотрудника и название зоны хранения.</returns>
         public override string ToString()
         {
             return $"{ProductAccId} - {EmployeeName} - {StorageZone}";

@@ -12,6 +12,26 @@ using Domain.Models;
 
 namespace UI
 {
+    /// <summary>
+    /// Форма для управления зонами хранения в системе.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Форма предоставляет интерфейс для просмотра, добавления, обновления, удаления и фильтрации
+    /// зон хранения. Использует <see cref="DataGridView"/> для отображения списка зон,
+    /// <see cref="BindingNavigator"/> для навигации и элементы управления для ввода данных.
+    /// </para>
+    /// <para>
+    /// Данные обогащаются названием склада через класс <see cref="StorageZoneView"/>. Поддерживает
+    /// фильтрацию по текстовому запросу и работу с типами зон через перечисление <see cref="ZoneType"/>.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var form = new StorageZoneForm();
+    /// form.ShowDialog();
+    /// </code>
+    /// </example>
     public partial class StorageZoneForm : Form
     {
         private readonly IStorageZoneRepository _storageZoneRepository;
@@ -26,6 +46,14 @@ namespace UI
         private List<StorageZone> _allStorageZones;
         private Dictionary<int, string> _warehouseNames;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="StorageZoneForm"/>.
+        /// </summary>
+        /// <remarks>
+        /// Инициализирует компоненты формы, репозитории, <see cref="BindingSource"/> и
+        /// <see cref="BindingNavigator"/>. Настраивает элементы управления навигатора, включая
+        /// кнопки поиска, сброса и фильтрации. Подписывается на событие добавления новой записи.
+        /// </remarks>
         public StorageZoneForm()
         {
             InitializeComponent();
@@ -87,6 +115,14 @@ namespace UI
             };
         }
 
+        /// <summary>
+        /// Обрабатывает событие загрузки формы.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает методы для загрузки зон хранения, складов и типов зон.
+        /// </remarks>
         private void StorageZoneForm_Load(object sender, EventArgs e)
         {
             LoadStorageZones();
@@ -94,6 +130,15 @@ namespace UI
             LoadZoneTypes();
         }
 
+        /// <summary>
+        /// Загружает список зон хранения и отображает их в таблице.
+        /// </summary>
+        /// <remarks>
+        /// Получает все зоны хранения через <see cref="IStorageZoneRepository.GetAll"/> и
+        /// названия складов через <see cref="IWarehouseRepository.GetAll"/>. Обогащает данные
+        /// названием склада с помощью <see cref="StorageZoneView"/> и привязывает их к
+        /// <see cref="DataGridView"/> через <see cref="BindingSource"/>. Настраивает заголовки колонок.
+        /// </remarks>
         private void LoadStorageZones()
         {
             try
@@ -126,6 +171,13 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Загружает список складов в выпадающий список.
+        /// </summary>
+        /// <remarks>
+        /// Получает данные через <see cref="IWarehouseRepository.GetAll"/> и привязывает их
+        /// к <see cref="ComboBox"/> с отображением имени склада и значением ID.
+        /// </remarks>
         private void LoadWarehouses()
         {
             try
@@ -141,6 +193,12 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Загружает типы зон в выпадающий список.
+        /// </summary>
+        /// <remarks>
+        /// Получает значения перечисления <see cref="ZoneType"/> и привязывает их к <see cref="ComboBox"/>.
+        /// </remarks>
         private void LoadZoneTypes()
         {
             try
@@ -154,6 +212,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения выбора строки в таблице.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Заполняет элементы управления данными выбранной зоны хранения, включая склад,
+        /// вместимость, тип зоны и название.
+        /// </remarks>
         private void dataGridViewStorageZones_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewStorageZones.SelectedRows.Count > 0)
@@ -174,6 +241,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Добавить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет ввод, создаёт новую зону хранения, добавляет её в базу данных,
+        /// перезагружает список зон и очищает поля ввода.
+        /// </remarks>
         private void btnAdd_Click(object sender, EventArgs e)
         {
             try
@@ -198,6 +274,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Обновить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор зоны и ввод, обновляет данные зоны в базе данных,
+        /// перезагружает список зон и очищает поля ввода.
+        /// </remarks>
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             try
@@ -225,6 +310,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Удалить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор зоны, запрашивает подтверждение, удаляет зону из базы данных,
+        /// перезагружает список зон и очищает поля ввода.
+        /// </remarks>
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
@@ -248,6 +342,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Применяет фильтр к списку зон хранения на основе текстового запроса.
+        /// </summary>
+        /// <param name="searchText">Текст для фильтрации.</param>
+        /// <remarks>
+        /// Получает отфильтрованные зоны через <see cref="IStorageZoneRepository.GetFiltered"/>,
+        /// обогащает их названием склада и обновляет таблицу. Показывает сообщение, если ничего не найдено.
+        /// </remarks>
         private void ApplyFilter(string searchText)
         {
             try
@@ -282,11 +384,19 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Поиск".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет текстовое поле поиска и вызывает <see cref="ApplyFilter"/> с введённым текстом.
+        /// </remarks>
         private void ToolStripButtonFind_Click(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null)
             {
-                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.");
+                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -300,17 +410,33 @@ namespace UI
             ApplyFilter(searchText);
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Сброс".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Перезагружает список зон хранения и очищает поле поиска.
+        /// </remarks>
         private void ToolStripButtonReset_Click(object sender, EventArgs e)
         {
             LoadStorageZones();
             _toolStripTextBoxFind.Text = null;
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения состояния флажка фильтрации.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// При включённом флажке применяет фильтр на основе текста поиска, при выключенном — сбрасывает данные.
+        /// </remarks>
         private void CheckBoxFind_CheckedChanged(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null || _checkBoxFind == null)
             {
-                MessageBox.Show("Ошибка: элементы не инициализированы.");
+                MessageBox.Show("Ошибка: элементы не инициализированы.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _checkBoxFind.Checked = false;
                 return;
             }
@@ -333,6 +459,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Проверяет корректность введённых данных.
+        /// </summary>
+        /// <returns><c>true</c>, если данные корректны; иначе <c>false</c>.</returns>
+        /// <remarks>
+        /// Проверяет выбор склада, корректность вместимости, выбор типа зоны и наличие названия зоны.
+        /// Показывает сообщения об ошибках при некорректных данных.
+        /// </remarks>
         private bool ValidateInput()
         {
             if (cmbWarehouse.SelectedValue == null)
@@ -362,6 +496,13 @@ namespace UI
             return true;
         }
 
+        /// <summary>
+        /// Очищает поля ввода и сбрасывает выбранную зону хранения.
+        /// </summary>
+        /// <remarks>
+        /// Сбрасывает выпадающий список склада, поля вместимости и названия зоны, а также тип зоны.
+        /// Устанавливает <see cref="_selectedStorageZone"/> в null.
+        /// </remarks>
         private void ClearInputs()
         {
             cmbWarehouse.SelectedIndex = -1;
@@ -371,12 +512,37 @@ namespace UI
             _selectedStorageZone = null;
         }
 
+        /// <summary>
+        /// Представляет модель представления для отображения данных зон хранения в таблице.
+        /// </summary>
+        /// <remarks>
+        /// Класс обогащает данные <see cref="StorageZone"/> названием склада вместо его ID.
+        /// </remarks>
         private class StorageZoneView
         {
+            /// <summary>
+            /// Получает или задаёт идентификатор зоны хранения.
+            /// </summary>
             public int StorageId { get; set; }
+
+            /// <summary>
+            /// Получает или задаёт название склада.
+            /// </summary>
             public string WarehouseName { get; set; }
+
+            /// <summary>
+            /// Получает или задаёт вместимость зоны.
+            /// </summary>
             public int Capacity { get; set; }
+
+            /// <summary>
+            /// Получает или задаёт тип зоны.
+            /// </summary>
             public ZoneType ZoneType { get; set; }
+
+            /// <summary>
+            /// Получает или задаёт название зоны.
+            /// </summary>
             public string ZoneName { get; set; }
         }
     }

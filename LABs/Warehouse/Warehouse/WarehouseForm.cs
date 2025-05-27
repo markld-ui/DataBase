@@ -12,6 +12,27 @@ using Domain.Models;
 
 namespace UI
 {
+    /// <summary>
+    /// Форма для управления складами в системе.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Форма предоставляет интерфейс для просмотра, добавления, обновления, удаления и фильтрации
+    /// складов. Использует <see cref="DataGridView"/> для отображения списка складов,
+    /// <see cref="BindingNavigator"/> для навигации и элементы управления для ввода данных.
+    /// </para>
+    /// <para>
+    /// Данные складов загружаются из репозитория <see cref="IWarehouseRepository"/>. Форма
+    /// поддерживает фильтрацию по текстовому запросу и минимальную валидацию ввода (проверка
+    /// названия склада).
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var form = new WarehouseForm();
+    /// form.ShowDialog();
+    /// </code>
+    /// </example>
     public partial class WarehouseForm : Form
     {
         private readonly IWarehouseRepository _warehouseRepository;
@@ -24,6 +45,14 @@ namespace UI
         private ToolStripButton _toolStripButtonReset;
         private List<Warehouse> _allWarehouses;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="WarehouseForm"/>.
+        /// </summary>
+        /// <remarks>
+        /// Инициализирует компоненты формы, репозиторий, <see cref="BindingSource"/> и
+        /// <see cref="BindingNavigator"/>. Настраивает элементы управления навигатора, включая
+        /// кнопки поиска, сброса и фильтрации.
+        /// </remarks>
         public WarehouseForm()
         {
             InitializeComponent();
@@ -78,11 +107,27 @@ namespace UI
             _bindingNavigator.Items.Add(checkBoxHost);
         }
 
+        /// <summary>
+        /// Обрабатывает событие загрузки формы.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Вызывает метод для загрузки списка складов.
+        /// </remarks>
         private void WarehouseForm_Load(object sender, EventArgs e)
         {
             LoadWarehouses();
         }
 
+        /// <summary>
+        /// Загружает список складов и отображает их в таблице.
+        /// </summary>
+        /// <remarks>
+        /// Получает все записи складов через <see cref="IWarehouseRepository.GetAll"/> и
+        /// привязывает их к <see cref="DataGridView"/> через <see cref="BindingSource"/>.
+        /// Настраивает заголовки колонок.
+        /// </remarks>
         private void LoadWarehouses()
         {
             try
@@ -101,6 +146,14 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения выбора строки в таблице.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Заполняет элементы управления данными выбранного склада, включая название и адрес.
+        /// </remarks>
         private void dataGridViewWarehouses_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewWarehouses.SelectedRows.Count > 0)
@@ -115,6 +168,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Добавить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет ввод, создаёт новый склад, добавляет его в базу данных,
+        /// перезагружает список складов и очищает поля ввода.
+        /// </remarks>
         private void btnAdd_Click(object sender, EventArgs e)
         {
             try
@@ -137,6 +199,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Обновить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор склада и ввод, обновляет данные склада в базе данных,
+        /// перезагружает список складов и очищает поля ввода.
+        /// </remarks>
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             try
@@ -161,6 +232,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Удалить".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет выбор склада, запрашивает подтверждение, удаляет склад из базы данных,
+        /// перезагружает список складов и очищает поля ввода.
+        /// </remarks>
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
@@ -184,6 +264,15 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Применяет фильтр к списку складов на основе текстового запроса.
+        /// </summary>
+        /// <param name="searchText">Текст для фильтрации.</param>
+        /// <remarks>
+        /// Получает отфильтрованные записи через <see cref="IWarehouseRepository.GetFiltered"/>,
+        /// обновляет таблицу. Показывает сообщение, если ничего не найдено, и перезагружает
+        /// полный список.
+        /// </remarks>
         private void ApplyFilter(string searchText)
         {
             try
@@ -209,11 +298,19 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Поиск".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Проверяет текстовое поле поиска и вызывает <see cref="ApplyFilter"/> с введённым текстом.
+        /// </remarks>
         private void ToolStripButtonFind_Click(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null)
             {
-                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.");
+                MessageBox.Show("Ошибка: toolStripTextBoxFind не инициализирован.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -227,17 +324,33 @@ namespace UI
             ApplyFilter(searchText);
         }
 
+        /// <summary>
+        /// Обрабатывает событие нажатия кнопки "Сброс".
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// Перезагружает список складов и очищает поле поиска.
+        /// </remarks>
         private void ToolStripButtonReset_Click(object sender, EventArgs e)
         {
             LoadWarehouses();
             _toolStripTextBoxFind.Text = null;
         }
 
+        /// <summary>
+        /// Обрабатывает событие изменения состояния флажка фильтрации.
+        /// </summary>
+        /// <param name="sender">Объект, инициировавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        /// <remarks>
+        /// При включённом флажке применяет фильтр на основе текста поиска, при выключенном — сбрасывает данные.
+        /// </remarks>
         private void CheckBoxFind_CheckedChanged(object sender, EventArgs e)
         {
             if (_toolStripTextBoxFind == null || _checkBoxFind == null)
             {
-                MessageBox.Show("Ошибка: элементы не инициализированы.");
+                MessageBox.Show("Ошибка: элементы не инициализированы.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _checkBoxFind.Checked = false;
                 return;
             }
@@ -260,6 +373,13 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Проверяет корректность введённых данных.
+        /// </summary>
+        /// <returns><c>true</c>, если данные корректны; иначе <c>false</c>.</returns>
+        /// <remarks>
+        /// Проверяет только наличие названия склада. Поле адреса считается необязательным.
+        /// </remarks>
         private bool ValidateInput()
         {
             if (string.IsNullOrWhiteSpace(txtName.Text))
@@ -270,6 +390,13 @@ namespace UI
             return true;
         }
 
+        /// <summary>
+        /// Очищает поля ввода и сбрасывает выбранный склад.
+        /// </summary>
+        /// <remarks>
+        /// Очищает текстовые поля для названия и адреса. Устанавливает
+        /// <see cref="_selectedWarehouse"/> в null.
+        /// </remarks>
         private void ClearInputs()
         {
             txtName.Clear();

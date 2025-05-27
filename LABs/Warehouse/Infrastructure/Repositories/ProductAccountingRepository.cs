@@ -9,15 +9,59 @@ using Npgsql;
 
 namespace Infrastructure.Repositories
 {
+    /// <summary>
+    /// Реализация репозитория для работы с данными учета продуктов в базе данных PostgreSQL.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Класс реализует интерфейс <see cref="IProductAccountingRepository"/> и предоставляет методы для выполнения
+    /// CRUD-операций и фильтрации данных учета продуктов с использованием PostgreSQL через библиотеку Npgsql.
+    /// </para>
+    /// <para>
+    /// Все методы являются атомарными и потокобезопасными, так как используют отдельные подключения к базе данных,
+    /// создаваемые через <see cref="DatabaseConnection"/>.
+    /// </para>
+    /// <para>
+    /// Для корректной работы требуется настроенное подключение к базе данных PostgreSQL.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var dbConnection = new DatabaseConnection("Host=localhost;Username=user;Password=pass;Database=products");
+    /// var repository = new ProductAccountingRepository(dbConnection);
+    /// var productAccountings = repository.GetAll();
+    /// foreach (var pa in productAccountings)
+    /// {
+    ///     Console.WriteLine($"ID: {pa.ProductAccId}, Quantity: {pa.Quantity}, Status: {pa.MovementStatus}");
+    /// }
+    /// </code>
+    /// </example>
     public class ProductAccountingRepository : IProductAccountingRepository
     {
         private readonly DatabaseConnection _dbConnection;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр класса <see cref="ProductAccountingRepository"/>.
+        /// </summary>
+        /// <param name="dbConnection">Объект подключения к базе данных типа <see cref="DatabaseConnection"/>.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Выбрасывается, если параметр <paramref name="dbConnection"/> равен null.
+        /// </exception>
         public ProductAccountingRepository(DatabaseConnection dbConnection)
         {
             _dbConnection = dbConnection ?? throw new ArgumentNullException(nameof(dbConnection));
         }
 
+        /// <summary>
+        /// Получает все записи учета продуктов из базы данных.
+        /// </summary>
+        /// <returns>
+        /// Список <see cref="List{ProductAccounting}"/> всех записей учета продуктов.
+        /// Если записи отсутствуют, возвращает пустой список.
+        /// </returns>
+        /// <remarks>
+        /// Метод выполняет SQL-запрос для получения всех записей из таблицы product_accounting.
+        /// </remarks>
         public List<ProductAccounting> GetAll()
         {
             var productAccountings = new List<ProductAccounting>();
@@ -46,8 +90,21 @@ namespace Infrastructure.Repositories
             return productAccountings;
         }
 
+        /// <summary>
+        /// Получает запись учета продукта по указанному идентификатору.
+        /// </summary>
+        /// <param name="id">Идентификатор записи учета продукта (productAcc_id).</param>
+        /// <returns>
+        /// Объект <see cref="ProductAccounting"/> с данными записи или null, если запись не найдена.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">
+        /// Выбрасывается, если параметр <paramref name="id"/> меньше или равен 0.
+        /// </exception>
         public ProductAccounting GetById(int id)
         {
+            if (id <= 0)
+                throw new ArgumentException("Идентификатор записи учета продукта должен быть больше нуля.", nameof(id));
+
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
@@ -76,8 +133,40 @@ namespace Infrastructure.Repositories
             }
         }
 
+        /// <summary>
+        /// Добавляет новую запись учета продукта в базу данных.
+        /// </summary>
+        /// <param name="productAccounting">Объект записи учета продукта типа <see cref="ProductAccounting"/>.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Выбрасывается, если параметр <paramref name="productAccounting"/> равен null.
+        /// </exception>
+        /// <exception cref="System.ArgumentException">
+        /// Выбрасывается, если обязательные поля <see cref="ProductAccounting.SupplyId"/>, 
+        /// <see cref="ProductAccounting.EmployeeId"/>, <see cref="ProductAccounting.StorageId"/> или 
+        /// <see cref="ProductAccounting.Quantity"/> меньше или равны нулю, либо если 
+        /// <see cref="ProductAccounting.AccountingDate"/> имеет некорректное значение.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// Выбрасывается, если запись с таким <see cref="ProductAccounting.ProductAccId"/> уже существует.
+        /// </exception>
+        /// <remarks>
+        /// Метод устанавливает свойство <see cref="ProductAccounting.ProductAccId"/> на основе возвращаемого значения SQL-запроса.
+        /// </remarks>
         public void Add(ProductAccounting productAccounting)
         {
+            if (productAccounting == null)
+                throw new ArgumentNullException(nameof(productAccounting));
+            if (productAccounting.SupplyId <= 0)
+                throw new ArgumentException("Идентификатор поставки должен быть больше нуля.", nameof(productAccounting.SupplyId));
+            if (productAccounting.EmployeeId <= 0)
+                throw new ArgumentException("Идентификатор сотрудника должен быть больше нуля.", nameof(productAccounting.EmployeeId));
+            if (productAccounting.StorageId <= 0)
+                throw new ArgumentException("Идентификатор склада должен быть больше нуля.", nameof(productAccounting.StorageId));
+            if (productAccounting.Quantity <= 0)
+                throw new ArgumentException("Количество продукта должно быть больше нуля.", nameof(productAccounting.Quantity));
+            if (productAccounting.AccountingDate == default)
+                throw new ArgumentException("Дата учета должна быть указана.", nameof(productAccounting.AccountingDate));
+
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
@@ -96,8 +185,39 @@ namespace Infrastructure.Repositories
             }
         }
 
+        /// <summary>
+        /// Обновляет существующую запись учета продукта в базе данных.
+        /// </summary>
+        /// <param name="productAccounting">Объект записи учета продукта типа <see cref="ProductAccounting"/> с обновлёнными данными.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Выбрасывается, если параметр <paramref name="productAccounting"/> равен null.
+        /// </exception>
+        /// <exception cref="System.ArgumentException">
+        /// Выбрасывается, если <see cref="ProductAccounting.ProductAccId"/>, <see cref="ProductAccounting.SupplyId"/>, 
+        /// <see cref="ProductAccounting.EmployeeId"/>, <see cref="ProductAccounting.StorageId"/> или 
+        /// <see cref="ProductAccounting.Quantity"/> меньше или равны нулю, либо если 
+        /// <see cref="ProductAccounting.AccountingDate"/> имеет некорректное значение.
+        /// </exception>
+        /// <exception cref="System.Collections.Generic.KeyNotFoundException">
+        /// Выбрасывается, если запись с указанным <see cref="ProductAccounting.ProductAccId"/> не найдена.
+        /// </exception>
         public void Update(ProductAccounting productAccounting)
         {
+            if (productAccounting == null)
+                throw new ArgumentNullException(nameof(productAccounting));
+            if (productAccounting.ProductAccId <= 0)
+                throw new ArgumentException("Идентификатор записи учета продукта должен быть больше нуля.", nameof(productAccounting.ProductAccId));
+            if (productAccounting.SupplyId <= 0)
+                throw new ArgumentException("Идентификатор поставки должен быть больше нуля.", nameof(productAccounting.SupplyId));
+            if (productAccounting.EmployeeId <= 0)
+                throw new ArgumentException("Идентификатор сотрудника должен быть больше нуля.", nameof(productAccounting.EmployeeId));
+            if (productAccounting.StorageId <= 0)
+                throw new ArgumentException("Идентификатор склада должен быть больше нуля.", nameof(productAccounting.StorageId));
+            if (productAccounting.Quantity <= 0)
+                throw new ArgumentException("Количество продукта должно быть больше нуля.", nameof(productAccounting.Quantity));
+            if (productAccounting.AccountingDate == default)
+                throw new ArgumentException("Дата учета должна быть указана.", nameof(productAccounting.AccountingDate));
+
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
@@ -112,26 +232,74 @@ namespace Infrastructure.Repositories
                     cmd.Parameters.AddWithValue("quantity", productAccounting.Quantity);
                     cmd.Parameters.AddWithValue("last_movement_date", (object)productAccounting.LastMovementDate ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("movement_status", productAccounting.MovementStatus ?? "В наличии");
-                    cmd.ExecuteNonQuery();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                        throw new KeyNotFoundException($"Запись с идентификатором {productAccounting.ProductAccId} не найдена.");
                 }
             }
         }
 
+        /// <summary>
+        /// Удаляет запись учета продукта из базы данных по указанному идентификатору.
+        /// </summary>
+        /// <param name="id">Идентификатор записи учета продукта (productAcc_id).</param>
+        /// <exception cref="System.ArgumentException">
+        /// Выбрасывается, если параметр <paramref name="id"/> меньше или равен 0.
+        /// </exception>
+        /// <exception cref="System.Collections.Generic.KeyNotFoundException">
+        /// Выбрасывается, если запись с указанным идентификатором не найдена.
+        /// </exception>
         public void Delete(int id)
         {
+            if (id <= 0)
+                throw new ArgumentException("Идентификатор записи учета продукта должен быть больше нуля.", nameof(id));
+
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
                 using (var cmd = new NpgsqlCommand("DELETE FROM product_accounting WHERE productAcc_id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("id", id);
-                    cmd.ExecuteNonQuery();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                        throw new KeyNotFoundException($"Запись с идентификатором {id} не найдена.");
                 }
             }
         }
 
+        /// <summary>
+        /// Получает отфильтрованный список записей учета продуктов на основе текста поиска.
+        /// </summary>
+        /// <param name="searchText">Текст для поиска (по идентификатору, поставке, сотруднику, складу, дате или статусу).</param>
+        /// <returns>
+        /// Список <see cref="List{ProductAccounting}"/> записей, удовлетворяющих условиям поиска.
+        /// Если записи не найдены или <paramref name="searchText"/> пустой, возвращает пустой список.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// Поиск выполняется без учёта регистра с использованием оператора ILIKE в PostgreSQL.
+        /// Поиск охватывает поля таблицы product_accounting, а также связанные поля full_name и position из таблицы employee
+        /// и zone_name из таблицы storage_zone.
+        /// </para>
+        /// <para>
+        /// Если параметр <paramref name="searchText"/> равен null или пустой строке, метод возвращает пустой список.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var repository = new ProductAccountingRepository(dbConnection);
+        /// var filteredProducts = repository.GetFiltered("warehouse");
+        /// foreach (var pa in filteredProducts)
+        /// {
+        ///     Console.WriteLine($"ID: {pa.ProductAccId}, Quantity: {pa.Quantity}, Status: {pa.MovementStatus}");
+        /// }
+        /// </code>
+        /// </example>
         public List<ProductAccounting> GetFiltered(string searchText)
         {
+            if (string.IsNullOrWhiteSpace(searchText))
+                return new List<ProductAccounting>();
+
             var productAccountings = new List<ProductAccounting>();
             using (var conn = _dbConnection.GetConnection())
             {
