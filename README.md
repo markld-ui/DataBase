@@ -2,7 +2,7 @@
 
 ## 1. Обзор проекта
 
-**Система управления складом** — это Windows Forms приложение на C#, разработанное для управления данными о поставщиках, поставках, продуктах, сотрудниках, зонах хранения и складах. Приложение предоставляет графический интерфейс для выполнения операций CRUD (создание, чтение, обновление, удаление), фильтрации и навигации по данным. Проект использует PostgreSQL как базу данных и реализует многослойную архитектуру с разделением UI, домена и инфраструктуры.
+**Система управления складом** — это Windows Forms приложение на C#, разработанное для управления данными о поставщиках, поставках, продуктах, сотрудниках, зонах хранения и складах. Приложение предоставляет графический интерфейс для выполнения операций CRUD (создание, чтение, обновление, удаление), фильтрации и навигации по данным. Проект использует PostgreSQL как базу данных и реализует многослойную архитектуру с разделением UI, домена, инфраструктуры и общего слоя (`Common`).
 
 ### 1.1 Цели проекта
 - Обеспечить удобный интерфейс для управления складскими операциями.
@@ -42,7 +42,11 @@
    - Содержит реализацию репозиториев и подключение к базе данных.
 4. **Application**:
    - Пространства имён: `Application`, `Application.Common`.
-   - Содержит `AppContext` и утилиты (`ConfigurationManager`).
+   - Содержит `AppContext` для управления репозиториями и утилиты.
+5. **Common (Общий слой)**:
+   - Пространство имён: `Application.Common`.
+   - Содержит утилитарные классы, такие как `ConfigurationManager`, для управления конфигурацией приложения (например, строкой подключения к базе данных).
+   - Обеспечивает централизованный доступ к настройкам, что упрощает конфигурирование и поддержку.
 
 ### 2.2 Зависимости
 - **.NET Framework**: 4.8 (или выше) для Windows Forms.
@@ -76,16 +80,35 @@
   - **Описание**: Синглтон для предоставления экземпляров репозиториев.
   - **Поля**:
     - `Instance: AppContext` — статический экземпляр.
-    - Репозитории (например, `ISupplierRepository`, `IProductRepository`).
+    - Репозитории (например, `ISupplierRepository SupplierRepository`, `IProductRepository ProductRepository`, `ISupplyRepository SupplyRepository`, `IEmployeeRepository EmployeeRepository`, `IStorageZoneRepository StorageZoneRepository`, `IWarehouseRepository WarehouseRepository`).
   - **Методы**:
     - `Instance`: Свойство для получения единственного экземпляра.
-    - Конструктор: Инициализирует репозитории.
-  - **Особенности**: Использует `ConfigurationManager` для настройки.
+    - Конструктор: Инициализирует репозитории с использованием `ConfigurationManager`.
+  - **Особенности**: Использует `ConfigurationManager` для получения строки подключения и других настроек. Обеспечивает централизованный доступ ко всем репозиториям, что упрощает внедрение зависимостей в формы.
+  - **Пример использования**:
+    ```csharp
+    var supplierRepo = AppContext.Instance.SupplierRepository;
+    var suppliers = supplierRepo.GetAll();
+    ```
+
 - **Common/ConfigurationManager.cs**:
-  - **Описание**: Управляет конфигурацией, включая строку подключения к PostgreSQL.
+  - **Описание**: Утилитарный класс для управления конфигурацией приложения, включая строку подключения к PostgreSQL и другие настройки.
+  - **Поля**:
+    - `ConnectionString: string` — строка подключения к базе данных, загружаемая из `App.config`.
+    - `Settings: Dictionary<string, string>` — словарь для хранения дополнительных настроек (например, языка интерфейса или параметров логирования).
   - **Методы**:
-    - `GetConnectionString()`: Возвращает строку подключения.
-  - **Особенности**: Читает данные из `App.config`.
+    - `GetConnectionString(): string`: Возвращает строку подключения из `App.config`.
+    - `LoadSettings(): void`: Загружает дополнительные настройки из конфигурационного файла или других источников (например, `Settings.settings`).
+    - `GetSetting(string key): string`: Возвращает значение настройки по ключу.
+  - **Особенности**:
+    - Использует `System.Configuration.ConfigurationManager` для работы с `App.config`.
+    - Централизует управление конфигурацией, что упрощает изменение настроек без необходимости правки кода.
+    - Может быть расширен для поддержки других источников конфигурации (например, JSON-файлов или переменных окружения).
+  - **Пример использования**:
+    ```csharp
+    var connectionString = ConfigurationManager.GetConnectionString();
+    var language = ConfigurationManager.GetSetting("ApplicationLanguage");
+    ```
 
 ### 3.2 Domain
 - **Interfaces/*.cs**:
@@ -101,7 +124,10 @@
         void Delete(int supplierId);
     }
     ```
-  - **Особенности**: Интерфейсы унифицированы для всех сущностей.
+  - **Другие интерфейсы**:
+    - `IProductRepository`, `ISupplyRepository`, `IEmployeeRepository`, `IStorageZoneRepository`, `IWarehouseRepository`: Аналогичны, с методами `GetAll`, `GetFiltered`, `Add`, `Update`, `Delete`.
+  - **Особенности**: Интерфейсы унифицированы для всех сущностей, что обеспечивает единообразие взаимодействия между слоями.
+
 - **Models/*.cs**:
   - **Supplier.cs**:
     ```csharp
@@ -114,7 +140,72 @@
         public string Address { get; set; }
     }
     ```
-  - **Supply.cs**, **Product.cs**, **Employee.cs**, **StorageZone.cs**, **Warehouse.cs**: Аналогично, с полями согласно IDEF1X.
+  - **Product.cs**:
+    ```csharp
+    public class Product
+    {
+        public int ProductId { get; set; }
+        public string Name { get; set; }
+        public DateTime? ShelfLife { get; set; }
+        public string ProductType { get; set; }
+    }
+    ```
+  - **Supply.cs**:
+    ```csharp
+    public class Supply
+    {
+        public int SupplyId { get; set; }
+        public int ProductId { get; set; }
+        public int SupplierId { get; set; }
+        public DateTime SupplyDate { get; set; }
+        public int Quantity { get; set; }
+        public int? DeliveredQuantity { get; set; }
+    }
+    ```
+  - **Employee.cs**:
+    ```csharp
+    public class Employee
+    {
+        public int EmployeeId { get; set; }
+        public string FullName { get; set; }
+        public string Position { get; set; }
+        public string PhoneNumber { get; set; }
+    }
+    ```
+  - **ProductAccounting.cs**:
+    ```csharp
+    public class ProductAccounting
+    {
+        public int ProductAccId { get; set; }
+        public int SupplyId { get; set; }
+        public int EmployeeId { get; set; }
+        public int StorageId { get; set; }
+        public DateTime AccountDate { get; set; }
+        public int Quantity { get; set; }
+        public DateTime? LastMovementDate { get; set; }
+    }
+    ```
+  - **StorageZone.cs**:
+    ```csharp
+    public class StorageZone
+    {
+        public int StorageId { get; set; }
+        public int WarehouseId { get; set; }
+        public int? Height { get; set; }
+        public string ZoneType { get; set; }
+        public string ZoneName { get; set; }
+    }
+    ```
+  - **Warehouse.cs**:
+    ```csharp
+    public class Warehouse
+    {
+        public int WarehouseId { get; set; }
+        public string Name { get; set; }
+        public string Address { get; set; }
+    }
+    ```
+  - **Особенности**: Модели соответствуют IDEF1X диаграмме, с учётом всех полей и их типов.
 
 ### 3.3 Infrastructure
 - **Repositories/*.cs**:
@@ -139,132 +230,132 @@
   - **Особенности**: Использует `ConfigurationManager.GetConnectionString()`.
 
 ### 3.4 UI
-- **AboutForm.cs**:
-  - **Описание**: Форма с информацией о приложении.
-  - **Особенности**: Содержит текст о версии и разработчике.
-- **EmployeeForm.cs**:
-  - **Описание**: Управление сотрудниками.
-  - **Поля**: `_employeeRepository`, `_selectedEmployee`, `_bindingSource`.
-  - **Методы**: CRUD-операции, фильтрация.
-- **MainForm.cs**:
-  - **Описание**: Главная форма с меню для вызова других форм.
-  - **Особенности**: Содержит кнопки или меню для навигации.
-- **ProductAccountingForm.cs**:
-  - **Описание**: Учёт продукции (аналогично `SupplyForm`).
-  - **Поля**: `_productAccountingRepository`.
-- **ProductForm.cs**:
-  - **Описание**: Управление продуктами.
-  - **Поля**: `_productRepository`.
-- **StorageZoneForm.cs**:
-  - **Описание**: Управление зонами хранения.
-  - **Поля**: `_storageZoneRepository`.
-- **SupplierForm.cs**:
-  - **Описание**: Управление поставщиками (см. предыдущую документацию).
-- **App.config**:
-  - **Описание**: Содержит строку подключения (`connectionStrings`).
-- **logo.png**:
-  - **Описание**: Логотип приложения.
-- **Program.cs**:
-  - **Описание**: Точка входа, запускает `MainForm`.
-  - **Метод**: `Main`: Создаёт экземпляр `Application`.
-- **Settings.settings**:
-  - **Описание**: Хранит настройки (например, язык интерфейса).
-- **SQLQueries.cs**:
-  - **Описание**: Содержит SQL-запросы для PostgreSQL.
-  - **Пример**:
-    ```csharp
-    public static class SQLQueries
-    {
-        public const string GetSuppliers = "SELECT * FROM suppliers WHERE company_name LIKE @search";
-    }
-    ```
+- **AboutForm.cs**: Форма с информацией о приложении.
+- **EmployeeForm.cs**: Управление сотрудниками.
+- **MainForm.cs**: Главная форма с меню.
+- **ProductAccountingForm.cs**: Учёт продукции.
+- **ProductForm.cs**: Управление продуктами.
+- **StorageZoneForm.cs**: Управление зонами хранения.
+- **SupplierForm.cs**: Управление поставщиками (см. предыдущую документацию).
+- **App.config**: Содержит строку подключения.
+- **logo.png**: Логотип.
+- **Program.cs**: Точка входа.
+- **Settings.settings**: Настройки.
+- **SQLQueries.cs**: SQL-запросы.
 
 ## 4. База данных (PostgreSQL)
 
 ### 4.1 IDEF1X Диаграмма
 - **Сущности**:
-  - **Товары (product)**:
-    - `product_id` (PK).
-    - `наименование`, `срок годности`, `тип товара`.
-  - **Поставщики (supplier)**:
-    - `supplier_id` (PK).
-    - `наименование компании`, `контактное лицо`, `телефон`, `адрес`.
-  - **Поставка (supply)**:
-    - `supply_id` (PK).
-    - `product_id` (FK), `supplier_id` (FK).
-    - `дата поставки`, `количество`, `поставленное количество`.
-  - **Сотрудник (employee)**:
-    - `employee_id` (PK).
-    - `фио`, `должность`, `номер телефона`.
-  - **Учёт товара (product_accounting)**:
-    - `product_acc_id` (PK).
-    - `supply_id` (FK), `employee_id` (FK), `storage_id` (FK).
-    - `дата учёта`, `количество`, `дата последнего перемещения`.
-  - **Зона хранения (storage_zone)**:
-    - `storage_id` (PK).
-    - `warehouse_id` (FK).
-    - `высота`, `тип зоны`, `наименование зоны`.
-  - **Склад (warehouse)**:
-    - `warehouse_id` (PK).
-    - `наименование`, `адрес`.
+  - **Товары (product)**: `product_id`, `наименование`, `срок годности`, `тип товара`.
+  - **Поставщики (supplier)**: `supplier_id`, `наименование компании`, `контактное лицо`, `телефон`, `адрес`.
+  - **Поставка (supply)**: `supply_id`, `product_id`, `supplier_id`, `дата поставки`, `количество`, `поставленное количество`.
+  - **Сотрудник (employee)**: `employee_id`, `фио`, `должность`, `номер телефона`.
+  - **Учёт товара (product_accounting)**: `product_acc_id`, `supply_id`, `employee_id`, `storage_id`, `дата учёта`, `количество`, `дата последнего перемещения`.
+  - **Зона хранения (storage_zone)**: `storage_id`, `warehouse_id`, `высота`, `тип зоны`, `наименование зоны`.
+  - **Склад (warehouse)**: `warehouse_id`, `наименование`, `адрес`.
 
-### 4.2 SQL Схема
+### 4.2 Полная SQL Схема
+Ниже приведена полная SQL-схема для создания таблиц в PostgreSQL с учётом IDEF1X диаграммы. Добавлены ограничения на ключи, типы данных и значения по умолчанию, где это уместно.
+
 ```sql
+-- Таблица поставщиков
 CREATE TABLE suppliers (
     supplier_id SERIAL PRIMARY KEY,
     company_name VARCHAR(100) NOT NULL,
     contact_person VARCHAR(100),
     phone VARCHAR(20),
-    address VARCHAR(200)
+    address VARCHAR(200),
+    CONSTRAINT chk_company_name CHECK (company_name <> '')
 );
 
+-- Таблица товаров
 CREATE TABLE products (
     product_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     shelf_life DATE,
-    product_type VARCHAR(50)
+    product_type VARCHAR(50),
+    CONSTRAINT chk_name CHECK (name <> '')
 );
 
+-- Таблица поставок
 CREATE TABLE supplies (
     supply_id SERIAL PRIMARY KEY,
-    product_id INT REFERENCES products(product_id),
-    supplier_id INT REFERENCES suppliers(supplier_id),
-    supply_date DATE NOT NULL,
+    product_id INT NOT NULL,
+    supplier_id INT NOT NULL,
+    supply_date DATE NOT NULL DEFAULT CURRENT_DATE,
     quantity INT NOT NULL,
-    delivered_quantity INT
+    delivered_quantity INT,
+    CONSTRAINT fk_supply_product FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE RESTRICT,
+    CONSTRAINT fk_supply_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE RESTRICT,
+    CONSTRAINT chk_quantity CHECK (quantity > 0),
+    CONSTRAINT chk_delivered_quantity CHECK (delivered_quantity IS NULL OR delivered_quantity >= 0)
 );
 
+-- Таблица сотрудников
 CREATE TABLE employees (
     employee_id SERIAL PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     position VARCHAR(50),
-    phone_number VARCHAR(20)
+    phone_number VARCHAR(20),
+    CONSTRAINT chk_full_name CHECK (full_name <> '')
 );
 
-CREATE TABLE product_accounting (
-    product_acc_id SERIAL PRIMARY KEY,
-    supply_id INT REFERENCES supplies(supply_id),
-    employee_id INT REFERENCES employees(employee_id),
-    storage_id INT REFERENCES storage_zones(storage_id),
-    account_date DATE NOT NULL,
-    quantity INT NOT NULL,
-    last_movement_date DATE
-);
-
+-- Таблица зон хранения
 CREATE TABLE storage_zones (
     storage_id SERIAL PRIMARY KEY,
-    warehouse_id INT REFERENCES warehouses(warehouse_id),
+    warehouse_id INT NOT NULL,
     height INT,
     zone_type VARCHAR(50),
-    zone_name VARCHAR(100)
+    zone_name VARCHAR(100) NOT NULL,
+    CONSTRAINT fk_storage_zone_warehouse FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id) ON DELETE CASCADE,
+    CONSTRAINT chk_height CHECK (height IS NULL OR height > 0),
+    CONSTRAINT chk_zone_name CHECK (zone_name <> '')
 );
 
+-- Таблица складов
 CREATE TABLE warehouses (
     warehouse_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    address VARCHAR(200)
+    address VARCHAR(200),
+    CONSTRAINT chk_name CHECK (name <> '')
 );
+
+-- Таблица учёта товаров
+CREATE TABLE product_accounting (
+    product_acc_id SERIAL PRIMARY KEY,
+    supply_id INT NOT NULL,
+    employee_id INT NOT NULL,
+    storage_id INT NOT NULL,
+    account_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    quantity INT NOT NULL,
+    last_movement_date DATE,
+    CONSTRAINT fk_product_accounting_supply FOREIGN KEY (supply_id) REFERENCES supplies(supply_id) ON DELETE RESTRICT,
+    CONSTRAINT fk_product_accounting_employee FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE RESTRICT,
+    CONSTRAINT fk_product_accounting_storage FOREIGN KEY (storage_id) REFERENCES storage_zones(storage_id) ON DELETE RESTRICT,
+    CONSTRAINT chk_quantity CHECK (quantity >= 0)
+);
+
+-- Индексы для оптимизации поиска
+CREATE INDEX idx_supplies_product_id ON supplies(product_id);
+CREATE INDEX idx_supplies_supplier_id ON supplies(supplier_id);
+CREATE INDEX idx_product_accounting_supply_id ON product_accounting(supply_id);
+CREATE INDEX idx_storage_zones_warehouse_id ON storage_zones(warehouse_id);
 ```
+
+### 4.3 Комментарии к схеме
+- **Ограничения**:
+  - Поля с `NOT NULL` (например, `company_name`, `full_name`, `quantity`) гарантируют, что ключевые данные всегда заполнены.
+  - Проверки (`CHECK`) добавлены для обеспечения корректности данных (например, `quantity > 0`).
+  - Внешние ключи (`FOREIGN KEY`) обеспечивают целостность связей.
+  - `ON DELETE RESTRICT` предотвращает удаление записей, на которые ссылаются другие таблицы.
+  - `ON DELETE CASCADE` в `storage_zones` позволяет автоматически удалять зоны хранения при удалении склада.
+- **Индексы**:
+  - Добавлены индексы на часто используемые поля для ускорения запросов.
+- **Типы данных**:
+  - `SERIAL` используется для автоинкрементных первичных ключей.
+  - `VARCHAR` для строковых полей с разумными ограничениями длины.
+  - `DATE` для дат, с значением по умолчанию `CURRENT_DATE` где уместно.
 
 ## 5. Установка и настройка
 
@@ -272,27 +363,27 @@ CREATE TABLE warehouses (
 - **ОС**: Windows 7/10/11.
 - **.NET Framework**: 4.8.
 - **PostgreSQL**: 12.x или выше.
-- **IDE**: Visual Studio 2019/2022.
 - **Npgsql**: Установить через NuGet.
 
 ### 5.2 Установка
 1. Установите PostgreSQL и создайте базу данных.
-2. Добавьте Npgsql через NuGet: `Install-Package Npgsql`.
-3. Откройте проект в Visual Studio.
-4. Настройте `App.config`:
+2. Выполните SQL-схему для создания таблиц.
+3. Добавьте Npgsql через NuGet: `Install-Package Npgsql`.
+4. Откройте проект в Visual Studio.
+5. Настройте `App.config`:
    ```xml
    <connectionStrings>
        <add name="WarehouseConnection" connectionString="Host=localhost;Database=warehouse;Username=postgres;Password=your_password" />
    </connectionStrings>
    ```
-5. Скомпилируйте проект.
+6. Скомпилируйте проект.
 
 ### 5.3 Конфигурация
-- Обновите `ConfigurationManager.cs` с актуальной строкой подключения.
-- Создайте таблицы в PostgreSQL с помощью приведённой схемы.
+- Убедитесь, что `ConfigurationManager.cs` корректно загружает строку подключения из `App.config`.
+- Проверьте настройки в `Settings.settings` (например, язык интерфейса).
 
 ## 6. Использование
-- Запустите через `MainForm.cs`.
+- Запустите приложение через `MainForm.cs`.
 - Используйте меню для вызова форм (например, `SupplierForm`).
 
 ## 7. Тестирование
@@ -306,7 +397,11 @@ CREATE TABLE warehouses (
 
 ## 9. Замечания и рекомендации
 - **Ограничения**: Минимальная валидация, отсутствие логирования.
-- **Рекомендации**: Добавить валидацию, логирование, тесты.
+- **Рекомендации**:
+  - Добавить валидацию (например, формат телефона, диапазон дат).
+  - Внедрить логирование (например, Serilog).
+  - Добавить юнит-тесты для репозиториев.
+  - Оптимизировать запросы с помощью дополнительных индексов.
 
 ## 10. Лицензия
 Учебный проект.
@@ -315,4 +410,4 @@ CREATE TABLE warehouses (
 Свяжитесь через репозиторий.
 
 ---
-*Создано: 27 мая 2025 года, 04:16 CEST*
+*Создано: 27 мая 2025 года, 04:32 CEST*
