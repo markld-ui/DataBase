@@ -84,6 +84,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return supplies;
         }
 
@@ -115,6 +116,7 @@ namespace Infrastructure.Repositories
                                 Quantity = reader.GetInt32(4)
                             };
                         }
+
                         return null;
                     }
                 }
@@ -230,6 +232,7 @@ namespace Infrastructure.Repositories
                     OR s.quantity::text ILIKE @search
                     OR p.name ILIKE @search
                     OR sup.company_name ILIKE @search";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("search", $"%{searchText}%");
@@ -249,6 +252,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return supplies;
         }
     }

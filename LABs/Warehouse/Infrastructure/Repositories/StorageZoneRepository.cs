@@ -71,6 +71,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("SELECT storage_id, warehouse_id, capacity, zone_type, zone_name FROM storage_zone", conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -87,6 +88,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return storageZones;
         }
 
@@ -108,6 +110,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("SELECT storage_id, warehouse_id, capacity, zone_type, zone_name FROM storage_zone WHERE storage_id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("id", id);
@@ -124,6 +127,7 @@ namespace Infrastructure.Repositories
                                 ZoneName = reader.GetString(4)
                             };
                         }
+
                         return null;
                     }
                 }
@@ -153,10 +157,13 @@ namespace Infrastructure.Repositories
         {
             if (storageZone == null)
                 throw new ArgumentNullException(nameof(storageZone));
+
             if (storageZone.WarehouseId <= 0)
                 throw new ArgumentException("Идентификатор склада должен быть больше нуля.", nameof(storageZone.WarehouseId));
+
             if (storageZone.Capacity <= 0)
                 throw new ArgumentException("Вместимость зоны хранения должна быть больше нуля.", nameof(storageZone.Capacity));
+
             if (string.IsNullOrWhiteSpace(storageZone.ZoneName))
                 throw new ArgumentException("Название зоны хранения не может быть пустым.", nameof(storageZone.ZoneName));
 
@@ -164,7 +171,7 @@ namespace Infrastructure.Repositories
             {
                 conn.Open();
                 using (var cmd = new NpgsqlCommand(
-                    "INSERT INTO storage_zone (warehouse_id, capacity, zone_type, zone_name) VALUES (@warehouse_id, @capacity, @zone_type, @zone_name) RETURNING storage_id", conn))
+                "INSERT INTO storage_zone (warehouse_id, capacity, zone_type, zone_name) VALUES (@warehouse_id, @capacity, @zone_type, @zone_name) RETURNING storage_id", conn))
                 {
                     cmd.Parameters.AddWithValue("warehouse_id", storageZone.WarehouseId);
                     cmd.Parameters.AddWithValue("capacity", storageZone.Capacity);
@@ -196,12 +203,16 @@ namespace Infrastructure.Repositories
         {
             if (storageZone == null)
                 throw new ArgumentNullException(nameof(storageZone));
+
             if (storageZone.StorageId <= 0)
                 throw new ArgumentException("Идентификатор зоны хранения должен быть больше нуля.", nameof(storageZone.StorageId));
+
             if (storageZone.WarehouseId <= 0)
                 throw new ArgumentException("Идентификатор склада должен быть больше нуля.", nameof(storageZone.WarehouseId));
+
             if (storageZone.Capacity <= 0)
                 throw new ArgumentException("Вместимость зоны хранения должна быть больше нуля.", nameof(storageZone.Capacity));
+
             if (string.IsNullOrWhiteSpace(storageZone.ZoneName))
                 throw new ArgumentException("Название зоны хранения не может быть пустым.", nameof(storageZone.ZoneName));
 
@@ -217,6 +228,7 @@ namespace Infrastructure.Repositories
                     cmd.Parameters.Add(new NpgsqlParameter("zone_type", NpgsqlDbType.Unknown) { Value = storageZone.ZoneType.ToString(), DataTypeName = "zone_type" });
                     cmd.Parameters.AddWithValue("zone_name", storageZone.ZoneName);
                     int rowsAffected = cmd.ExecuteNonQuery();
+
                     if (rowsAffected == 0)
                         throw new KeyNotFoundException($"Зона хранения с идентификатором {storageZone.StorageId} не найдена.");
                 }
@@ -245,6 +257,7 @@ namespace Infrastructure.Repositories
                 {
                     cmd.Parameters.AddWithValue("id", id);
                     int rowsAffected = cmd.ExecuteNonQuery();
+
                     if (rowsAffected == 0)
                         throw new KeyNotFoundException($"Зона хранения с идентификатором {id} не найдена.");
                 }
@@ -297,6 +310,7 @@ namespace Infrastructure.Repositories
                     OR sz.zone_type::text ILIKE @search
                     OR sz.zone_name ILIKE @search
                     OR w.name ILIKE @search";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("search", $"%{searchText}%");
@@ -316,6 +330,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return storageZones;
         }
     }

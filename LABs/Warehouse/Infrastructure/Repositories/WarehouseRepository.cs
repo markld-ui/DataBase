@@ -69,6 +69,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("SELECT warehouse_id, name, address FROM warehouse", conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -83,6 +84,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return warehouses;
         }
 
@@ -112,6 +114,7 @@ namespace Infrastructure.Repositories
                                 Address = reader.GetString(2)
                             };
                         }
+
                         return null;
                     }
                 }
@@ -207,6 +210,7 @@ namespace Infrastructure.Repositories
                 conn.Open();
                 string query = "SELECT warehouse_id, name, address FROM warehouse WHERE " +
                                "warehouse_id::text ILIKE @search OR name ILIKE @search OR address ILIKE @search";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("search", $"%{searchText}%");
@@ -224,6 +228,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return warehouses;
         }
     }

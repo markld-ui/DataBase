@@ -86,6 +86,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return suppliers;
         }
 
@@ -120,6 +121,7 @@ namespace Infrastructure.Repositories
                                 Address = reader.IsDBNull(4) ? null : reader.GetString(4)
                             };
                         }
+
                         return null;
                     }
                 }
@@ -235,6 +237,7 @@ namespace Infrastructure.Repositories
                     OR contact_person ILIKE @search
                     OR phone ILIKE @search
                     OR address ILIKE @search";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("search", $"%{searchText}%");
@@ -254,6 +257,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return suppliers;
         }
     }

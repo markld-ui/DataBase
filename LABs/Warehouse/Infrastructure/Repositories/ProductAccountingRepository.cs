@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Interfaces;
+﻿using Domain.Interfaces;
 using Domain.Models;
 using Npgsql;
 
@@ -65,6 +60,7 @@ namespace Infrastructure.Repositories
         public List<ProductAccounting> GetAll()
         {
             var productAccountings = new List<ProductAccounting>();
+
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
@@ -87,6 +83,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return productAccountings;
         }
 
@@ -108,6 +105,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("SELECT productAcc_id, supply_id, employee_id, storage_id, accounting_date, quantity, last_movement_date, movement_status FROM product_accounting WHERE productAcc_id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("id", id);
@@ -127,6 +125,7 @@ namespace Infrastructure.Repositories
                                 MovementStatus = reader.IsDBNull(7) ? "В наличии" : reader.GetString(7)
                             };
                         }
+
                         return null;
                     }
                 }
@@ -156,20 +155,26 @@ namespace Infrastructure.Repositories
         {
             if (productAccounting == null)
                 throw new ArgumentNullException(nameof(productAccounting));
+
             if (productAccounting.SupplyId <= 0)
                 throw new ArgumentException("Идентификатор поставки должен быть больше нуля.", nameof(productAccounting.SupplyId));
+
             if (productAccounting.EmployeeId <= 0)
                 throw new ArgumentException("Идентификатор сотрудника должен быть больше нуля.", nameof(productAccounting.EmployeeId));
+
             if (productAccounting.StorageId <= 0)
                 throw new ArgumentException("Идентификатор склада должен быть больше нуля.", nameof(productAccounting.StorageId));
+
             if (productAccounting.Quantity <= 0)
                 throw new ArgumentException("Количество продукта должно быть больше нуля.", nameof(productAccounting.Quantity));
+
             if (productAccounting.AccountingDate == default)
                 throw new ArgumentException("Дата учета должна быть указана.", nameof(productAccounting.AccountingDate));
 
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand(
                     "INSERT INTO product_accounting (supply_id, employee_id, storage_id, accounting_date, quantity, last_movement_date, movement_status) VALUES (@supply_id, @employee_id, @storage_id, @accounting_date, @quantity, @last_movement_date, @movement_status) RETURNING productAcc_id", conn))
                 {
@@ -207,20 +212,26 @@ namespace Infrastructure.Repositories
                 throw new ArgumentNullException(nameof(productAccounting));
             if (productAccounting.ProductAccId <= 0)
                 throw new ArgumentException("Идентификатор записи учета продукта должен быть больше нуля.", nameof(productAccounting.ProductAccId));
+
             if (productAccounting.SupplyId <= 0)
                 throw new ArgumentException("Идентификатор поставки должен быть больше нуля.", nameof(productAccounting.SupplyId));
+
             if (productAccounting.EmployeeId <= 0)
                 throw new ArgumentException("Идентификатор сотрудника должен быть больше нуля.", nameof(productAccounting.EmployeeId));
+
             if (productAccounting.StorageId <= 0)
                 throw new ArgumentException("Идентификатор склада должен быть больше нуля.", nameof(productAccounting.StorageId));
+
             if (productAccounting.Quantity <= 0)
                 throw new ArgumentException("Количество продукта должно быть больше нуля.", nameof(productAccounting.Quantity));
+
             if (productAccounting.AccountingDate == default)
                 throw new ArgumentException("Дата учета должна быть указана.", nameof(productAccounting.AccountingDate));
 
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand(
                     "UPDATE product_accounting SET supply_id = @supply_id, employee_id = @employee_id, storage_id = @storage_id, accounting_date = @accounting_date, quantity = @quantity, last_movement_date = @last_movement_date, movement_status = @movement_status WHERE productAcc_id = @id", conn))
                 {
@@ -233,6 +244,7 @@ namespace Infrastructure.Repositories
                     cmd.Parameters.AddWithValue("last_movement_date", (object)productAccounting.LastMovementDate ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("movement_status", productAccounting.MovementStatus ?? "В наличии");
                     int rowsAffected = cmd.ExecuteNonQuery();
+
                     if (rowsAffected == 0)
                         throw new KeyNotFoundException($"Запись с идентификатором {productAccounting.ProductAccId} не найдена.");
                 }
@@ -257,10 +269,12 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("DELETE FROM product_accounting WHERE productAcc_id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("id", id);
                     int rowsAffected = cmd.ExecuteNonQuery();
+
                     if (rowsAffected == 0)
                         throw new KeyNotFoundException($"Запись с идентификатором {id} не найдена.");
                 }
@@ -304,6 +318,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 string query = @"
                     SELECT pa.productAcc_id, pa.supply_id, pa.employee_id, pa.storage_id, pa.accounting_date, pa.quantity, pa.last_movement_date, pa.movement_status
                     FROM product_accounting pa
@@ -320,9 +335,11 @@ namespace Infrastructure.Repositories
                     OR pa.quantity::text ILIKE @search
                     OR pa.movement_status ILIKE @search
                     OR (pa.last_movement_date::text ILIKE @search OR pa.last_movement_date IS NULL)";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("search", $"%{searchText}%");
+
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -342,6 +359,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return productAccountings;
         }
     }

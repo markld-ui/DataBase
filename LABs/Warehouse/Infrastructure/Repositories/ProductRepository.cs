@@ -1,9 +1,4 @@
 ﻿using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Domain.Interfaces;
 using Domain.Models;
 using NpgsqlTypes;
@@ -69,6 +64,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("SELECT product_id, name, expiry_date, product_type, is_active, photo FROM product", conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -107,6 +103,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("SELECT product_id, name, expiry_date, product_type, is_active, photo FROM product WHERE product_id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("id", id);
@@ -124,6 +121,7 @@ namespace Infrastructure.Repositories
                                 Photo = reader.IsDBNull(5) ? null : (byte[])reader.GetValue(5)
                             };
                         }
+
                         return null;
                     }
                 }
@@ -150,12 +148,14 @@ namespace Infrastructure.Repositories
         {
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
+
             if (string.IsNullOrWhiteSpace(product.Name))
                 throw new ArgumentException("Название продукта не может быть пустым.", nameof(product.Name));
 
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand(
                     "INSERT INTO product (name, expiry_date, product_type, is_active, photo) VALUES (@name, @expiry_date, @product_type, @is_active, @photo) RETURNING product_id", conn))
                 {
@@ -187,8 +187,10 @@ namespace Infrastructure.Repositories
         {
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
+
             if (product.ProductId <= 0)
                 throw new ArgumentException("Идентификатор продукта должен быть больше нуля.", nameof(product.ProductId));
+
             if (string.IsNullOrWhiteSpace(product.Name))
                 throw new ArgumentException("Название продукта не может быть пустым.", nameof(product.Name));
 
@@ -205,6 +207,7 @@ namespace Infrastructure.Repositories
                     cmd.Parameters.AddWithValue("is_active", product.IsActive);
                     cmd.Parameters.AddWithValue("photo", (object)product.Photo ?? DBNull.Value);
                     int rowsAffected = cmd.ExecuteNonQuery();
+
                     if (rowsAffected == 0)
                         throw new KeyNotFoundException($"Продукт с идентификатором {product.ProductId} не найден.");
                 }
@@ -229,10 +232,12 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("DELETE FROM product WHERE product_id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("id", id);
                     int rowsAffected = cmd.ExecuteNonQuery();
+
                     if (rowsAffected == 0)
                         throw new KeyNotFoundException($"Продукт с идентификатором {id} не найден.");
                 }
@@ -271,6 +276,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 string query;
                 if (string.IsNullOrWhiteSpace(searchText))
                 {
@@ -287,10 +293,12 @@ namespace Infrastructure.Repositories
                         OR product_type::text ILIKE @search
                         OR is_active::text ILIKE @search";
                 }
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     if (!string.IsNullOrWhiteSpace(searchText))
                         cmd.Parameters.AddWithValue("search", $"%{searchText}%");
+
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
@@ -308,6 +316,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return products;
         }
     }

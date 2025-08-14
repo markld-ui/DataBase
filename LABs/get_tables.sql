@@ -5,3 +5,5 @@ SELECT * FROM supplier;
 SELECT * FROM employee;
 SELECT * FROM supply;
 SELECT * FROM product_accounting;
+SELECT * FROM product;
+SELECT * FROM employee;

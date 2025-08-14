@@ -1,9 +1,4 @@
-﻿using System;
-using Npgsql;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Npgsql;
 using Domain.Interfaces;
 using Domain.Models;
 
@@ -68,6 +63,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("SELECT employee_id, photo, full_name, position, phone FROM employee", conn))
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -84,6 +80,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return employees;
         }
 
@@ -105,6 +102,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("SELECT employee_id, photo, full_name, position, phone FROM employee WHERE employee_id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("id", id);
@@ -121,6 +119,7 @@ namespace Infrastructure.Repositories
                                 Phone = reader.IsDBNull(4) ? null : reader.GetString(4)
                             };
                         }
+
                         return null;
                     }
                 }
@@ -144,8 +143,10 @@ namespace Infrastructure.Repositories
         {
             if (employee == null)
                 throw new ArgumentNullException(nameof(employee));
+
             if (string.IsNullOrWhiteSpace(employee.FullName))
                 throw new ArgumentException("Полное имя сотрудника не может быть пустым.", nameof(employee.FullName));
+
             if (string.IsNullOrWhiteSpace(employee.Position))
                 throw new ArgumentException("Должность сотрудника не может быть пустой.", nameof(employee.Position));
 
@@ -182,10 +183,13 @@ namespace Infrastructure.Repositories
         {
             if (employee == null)
                 throw new ArgumentNullException(nameof(employee));
+
             if (employee.EmployeeId <= 0)
                 throw new ArgumentException("Идентификатор сотрудника должен быть больше нуля.", nameof(employee.EmployeeId));
+
             if (string.IsNullOrWhiteSpace(employee.FullName))
                 throw new ArgumentException("Полное имя сотрудника не может быть пустым.", nameof(employee.FullName));
+
             if (string.IsNullOrWhiteSpace(employee.Position))
                 throw new ArgumentException("Должность сотрудника не может быть пустой.", nameof(employee.Position));
 
@@ -225,6 +229,7 @@ namespace Infrastructure.Repositories
             using (var conn = _dbConnection.GetConnection())
             {
                 conn.Open();
+
                 using (var cmd = new NpgsqlCommand("DELETE FROM employee WHERE employee_id = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("id", id);
@@ -277,6 +282,7 @@ namespace Infrastructure.Repositories
                     OR full_name ILIKE @search
                     OR position ILIKE @search
                     OR phone ILIKE @search";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("search", $"%{searchText}%");
@@ -296,6 +302,7 @@ namespace Infrastructure.Repositories
                     }
                 }
             }
+
             return employees;
         }
     }

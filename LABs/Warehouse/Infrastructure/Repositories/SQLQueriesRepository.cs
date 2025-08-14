@@ -75,6 +75,7 @@ namespace Infrastructure.Repositories
                     FROM product_accounting pa
                     INNER JOIN employee e ON pa.employee_id = e.employee_id
                     INNER JOIN storage_zone sz ON pa.storage_id = sz.storage_id";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     using (var adapter = new NpgsqlDataAdapter(cmd))
@@ -105,6 +106,7 @@ namespace Infrastructure.Repositories
         {
             if (employeeId <= 0)
                 throw new ArgumentException("Идентификатор сотрудника должен быть больше нуля.", nameof(employeeId));
+
             if (!EmployeeExists(employeeId))
                 throw new ArgumentException($"Сотрудник с идентификатором {employeeId} не существует.", nameof(employeeId));
 
@@ -119,6 +121,7 @@ namespace Infrastructure.Repositories
                     INNER JOIN employee e ON pa.employee_id = e.employee_id
                     INNER JOIN storage_zone sz ON pa.storage_id = sz.storage_id
                     WHERE pa.employee_id = @employeeId";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("employeeId", employeeId);
@@ -152,6 +155,7 @@ namespace Infrastructure.Repositories
         {
             if (minRecordCount < 0)
                 throw new ArgumentException("Минимальное количество записей не может быть отрицательным.", nameof(minRecordCount));
+
             if (startDate > DateTime.UtcNow)
                 throw new ArgumentException("Начальная дата не может быть в будущем.", nameof(startDate));
 
@@ -169,10 +173,12 @@ namespace Infrastructure.Repositories
                     GROUP BY sz.zone_name
                     HAVING COUNT(pa.productAcc_id) >= @minRecordCount
                     ORDER BY total_quantity DESC";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("minRecordCount", minRecordCount);
                     cmd.Parameters.AddWithValue("startDate", startDate);
+
                     using (var adapter = new NpgsqlDataAdapter(cmd))
                     {
                         DataTable table = new DataTable();
@@ -201,6 +207,7 @@ namespace Infrastructure.Repositories
                 string query = @"
                     SELECT productAcc_id, accounting_date, quantity, employee_id, supply_id, storage_id
                     FROM product_accounting";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     using (var adapter = new NpgsqlDataAdapter(cmd))
@@ -230,6 +237,7 @@ namespace Infrastructure.Repositories
         {
             if (supplyId <= 0)
                 throw new ArgumentException("Идентификатор поставки должен быть больше нуля.", nameof(supplyId));
+
             if (!SupplyExists(supplyId))
                 throw new ArgumentException($"Поставка с идентификатором {supplyId} не существует.", nameof(supplyId));
 
@@ -242,6 +250,7 @@ namespace Infrastructure.Repositories
                            (SELECT e.full_name FROM employee e WHERE e.employee_id = pa.employee_id) AS employee_name
                     FROM product_accounting pa
                     WHERE pa.supply_id = @supplyId";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("supplyId", supplyId);
@@ -273,6 +282,7 @@ namespace Infrastructure.Repositories
         {
             if (supplyId <= 0)
                 throw new ArgumentException("Идентификатор поставки должен быть больше нуля.", nameof(supplyId));
+
             if (!SupplyExists(supplyId))
                 throw new ArgumentException($"Поставка с идентификатором {supplyId} не существует.", nameof(supplyId));
 
@@ -286,6 +296,7 @@ namespace Infrastructure.Repositories
                     INNER JOIN employee e ON pa.employee_id = e.employee_id
                     WHERE pa.supply_id = @supplyId
                     AND pa.quantity > (SELECT AVG(quantity) FROM product_accounting WHERE supply_id = @supplyId)";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("supplyId", supplyId);
@@ -318,6 +329,7 @@ namespace Infrastructure.Repositories
             {
                 conn.Open();
                 string query = "SELECT EXISTS (SELECT 1 FROM employee WHERE employee_id = @employeeId)";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("employeeId", employeeId);
@@ -345,6 +357,7 @@ namespace Infrastructure.Repositories
             {
                 conn.Open();
                 string query = "SELECT EXISTS (SELECT 1 FROM supply WHERE supply_id = @supplyId)";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("supplyId", supplyId);
@@ -372,6 +385,7 @@ namespace Infrastructure.Repositories
             {
                 conn.Open();
                 string query = "SELECT EXISTS (SELECT 1 FROM storage_zone WHERE storage_id = @storageId)";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("storageId", storageId);
@@ -399,6 +413,7 @@ namespace Infrastructure.Repositories
             {
                 conn.Open();
                 string query = "SELECT EXISTS (SELECT 1 FROM product_accounting WHERE productAcc_id = @recordId)";
+
                 using (var cmd = new NpgsqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("recordId", recordId);
@@ -434,18 +449,25 @@ namespace Infrastructure.Repositories
         {
             if (employeeId <= 0)
                 throw new ArgumentException("Идентификатор сотрудника должен быть больше нуля.", nameof(employeeId));
+
             if (supplyId <= 0)
                 throw new ArgumentException("Идентификатор поставки должен быть больше нуля.", nameof(supplyId));
+
             if (storageId <= 0)
                 throw new ArgumentException("Идентификатор зоны хранения должен быть больше нуля.", nameof(storageId));
+
             if (quantity <= 0)
                 throw new ArgumentException("Количество продуктов должно быть больше нуля.", nameof(quantity));
+
             if (accountingDate > DateTime.UtcNow)
                 throw new ArgumentException("Дата учета не может быть в будущем.", nameof(accountingDate));
+
             if (!EmployeeExists(employeeId))
                 throw new InvalidOperationException($"Сотрудник с идентификатором {employeeId} не существует.");
+
             if (!SupplyExists(supplyId))
                 throw new InvalidOperationException($"Поставка с идентификатором {supplyId} не существует.");
+
             if (!StorageZoneExists(storageId))
                 throw new InvalidOperationException($"Зона хранения с идентификатором {storageId} не существует.");
 
@@ -459,6 +481,7 @@ namespace Infrastructure.Repositories
                         string query = @"
                             INSERT INTO product_accounting (accounting_date, quantity, employee_id, supply_id, storage_id)
                             VALUES (@accountingDate, @quantity, @employeeId, @supplyId, @storageId)";
+
                         using (var cmd = new NpgsqlCommand(query, conn, transaction))
                         {
                             cmd.Parameters.AddWithValue("accountingDate", accountingDate);
@@ -468,6 +491,7 @@ namespace Infrastructure.Repositories
                             cmd.Parameters.AddWithValue("storageId", storageId);
                             cmd.ExecuteNonQuery();
                         }
+
                         transaction.Commit();
                     }
                     catch (Exception ex)
@@ -510,24 +534,34 @@ namespace Infrastructure.Repositories
         {
             if (id <= 0)
                 throw new ArgumentException("Идентификатор записи должен быть больше нуля.", nameof(id));
+
             if (quantity.HasValue && quantity <= 0)
                 throw new ArgumentException("Количество продуктов должно быть больше нуля.", nameof(quantity));
+
             if (accountingDate.HasValue && accountingDate > DateTime.UtcNow)
                 throw new ArgumentException("Дата учета не может быть в будущем.", nameof(accountingDate));
+
             if (employeeId.HasValue && employeeId <= 0)
                 throw new ArgumentException("Идентификатор сотрудника должен быть больше нуля.", nameof(employeeId));
+
             if (supplyId.HasValue && supplyId <= 0)
                 throw new ArgumentException("Идентификатор поставки должен быть больше нуля.", nameof(supplyId));
+
             if (storageId.HasValue && storageId <= 0)
                 throw new ArgumentException("Идентификатор зоны хранения должен быть больше нуля.", nameof(storageId));
+
             if (!RecordExists(id))
                 throw new InvalidOperationException($"Запись с идентификатором {id} не существует.");
+
             if (employeeId.HasValue && !EmployeeExists(employeeId.Value))
                 throw new InvalidOperationException($"Сотрудник с идентификатором {employeeId.Value} не существует.");
+
             if (supplyId.HasValue && !SupplyExists(supplyId.Value))
                 throw new InvalidOperationException($"Поставка с идентификатором {supplyId.Value} не существует.");
+
             if (storageId.HasValue && !StorageZoneExists(storageId.Value))
                 throw new InvalidOperationException($"Зона хранения с идентификатором {storageId.Value} не существует.");
+
 
             if (!accountingDate.HasValue && !quantity.HasValue && !employeeId.HasValue && !supplyId.HasValue && !storageId.HasValue)
                 return; // Нет данных для обновления
@@ -541,31 +575,37 @@ namespace Infrastructure.Repositories
                     {
                         string query = "UPDATE product_accounting SET ";
                         var parameters = new List<NpgsqlParameter>();
+
                         if (accountingDate.HasValue)
                         {
                             query += "accounting_date = @accountingDate, ";
                             parameters.Add(new NpgsqlParameter("accountingDate", accountingDate.Value));
                         }
+
                         if (quantity.HasValue)
                         {
                             query += "quantity = @quantity, ";
                             parameters.Add(new NpgsqlParameter("quantity", quantity.Value));
                         }
+
                         if (employeeId.HasValue)
                         {
                             query += "employee_id = @employeeId, ";
                             parameters.Add(new NpgsqlParameter("employeeId", employeeId.Value));
                         }
+
                         if (supplyId.HasValue)
                         {
                             query += "supply_id = @supplyId, ";
                             parameters.Add(new NpgsqlParameter("supplyId", supplyId.Value));
                         }
+
                         if (storageId.HasValue)
                         {
                             query += "storage_id = @storageId, ";
                             parameters.Add(new NpgsqlParameter("storageId", storageId.Value));
                         }
+
                         query = query.TrimEnd(',', ' ') + " WHERE productAcc_id = @id";
                         parameters.Add(new NpgsqlParameter("id", id));
 
@@ -576,6 +616,7 @@ namespace Infrastructure.Repositories
                             if (rowsAffected == 0)
                                 throw new InvalidOperationException($"Запись с идентификатором {id} не найдена.");
                         }
+
                         transaction.Commit();
                     }
                     catch (Exception ex)
@@ -604,6 +645,7 @@ namespace Infrastructure.Repositories
         {
             if (id <= 0)
                 throw new ArgumentException("Идентификатор записи должен быть больше нуля.", nameof(id));
+
             if (!RecordExists(id))
                 throw new InvalidOperationException($"Запись с идентификатором {id} не существует.");
 
@@ -619,9 +661,11 @@ namespace Infrastructure.Repositories
                         {
                             cmd.Parameters.AddWithValue("id", id);
                             int rowsAffected = cmd.ExecuteNonQuery();
+
                             if (rowsAffected == 0)
                                 throw new InvalidOperationException($"Запись с идентификатором {id} не найдена.");
                         }
+
                         transaction.Commit();
                     }
                     catch (Exception ex)
