@@ -44,7 +44,12 @@
             this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picLogo.TabIndex = 0;
             this.picLogo.TabStop = false;
-            this.picLogo.Image = new Bitmap(@"C:\Users\markld\Desktop\1\ТУСУР\2 курс\DataBase\DataBase\LABs\Warehouse\Warehouse\logo.png");
+
+            //Для работы на ноутбуке в Томске
+            //this.picLogo.Image = new Bitmap(@"C:\Users\markld\Desktop\1\ТУСУР\2 курс\DataBase\DataBase\LABs\Warehouse\Warehouse\logo.png");
+
+            //Для работы на пк в Екб
+            this.picLogo.Image = new Bitmap(@"C:\Users\markld\Desktop\MyProjects\DataBase\LABs\Warehouse\Warehouse\logo.png");
 
             // lblTitle
             this.lblTitle.AutoSize = true;
