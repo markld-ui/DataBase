@@ -238,9 +238,11 @@ namespace UI
             {
                 var selectedRow = dataGridViewSupplies.SelectedRows[0];
                 var viewItem = selectedRow.DataBoundItem as SupplyView;
+
                 if (viewItem != null)
                 {
                     _selectedSupply = _allSupplies.FirstOrDefault(s => s.SupplyId == viewItem.SupplyId);
+
                     if (_selectedSupply != null)
                     {
                         cmbProduct.SelectedValue = _selectedSupply.ProductId;
@@ -416,6 +418,7 @@ namespace UI
             }
 
             string searchText = _toolStripTextBoxFind.Text.Trim();
+
             if (string.IsNullOrWhiteSpace(searchText))
             {
                 MessageBox.Show("Введите текст для поиска.", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -459,6 +462,7 @@ namespace UI
             if (_checkBoxFind.Checked)
             {
                 string searchText = _toolStripTextBoxFind.Text.Trim();
+
                 if (string.IsNullOrWhiteSpace(searchText))
                 {
                     MessageBox.Show("Введите текст для фильтрации.", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Information);

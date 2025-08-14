@@ -168,9 +168,7 @@ namespace UI
         private void dataGridViewEmployees_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridViewEmployees.SelectedRows.Count > 0)
-            {
                 UpdateSelectedEmployee();
-            }
         }
 
         private void UpdateSelectedEmployee()
@@ -179,9 +177,7 @@ namespace UI
             _selectedEmployee = selectedRow.DataBoundItem as Employee;
 
             if (_selectedEmployee != null)
-            {
                 UpdateFormFields();
-            }
         }
 
         private void UpdateFormFields()
@@ -215,10 +211,9 @@ namespace UI
             using (var openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp";
+
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
                     picPhoto.Image = Image.FromFile(openFileDialog.FileName);
-                }
             }
         }
 

@@ -142,8 +142,8 @@ namespace UI
             {
                 var products = _productRepository.GetAll();
                 _bindingSource.DataSource = new BindingList<Product>(products);
-                dataGridViewProducts.DataSource = _bindingSource;
 
+                dataGridViewProducts.DataSource = _bindingSource;
                 dataGridViewProducts.Columns["ProductId"].HeaderText = "ID";
                 dataGridViewProducts.Columns["Name"].HeaderText = "Название";
                 dataGridViewProducts.Columns["ExpiryDate"].HeaderText = "Срок годности";
@@ -191,6 +191,7 @@ namespace UI
             {
                 var selectedRow = dataGridViewProducts.SelectedRows[0];
                 _selectedProduct = selectedRow.DataBoundItem as Product;
+
                 if (_selectedProduct != null)
                 {
                     txtName.Text = _selectedProduct.Name;
@@ -198,12 +199,11 @@ namespace UI
                     dtpExpiryDate.Checked = _selectedProduct.ExpiryDate.HasValue;
                     cmbProductType.SelectedItem = _selectedProduct.ProductType;
                     chkIsActive.Checked = _selectedProduct.IsActive;
+
                     if (_selectedProduct.Photo != null)
                     {
                         using (var ms = new System.IO.MemoryStream(_selectedProduct.Photo))
-                        {
                             picPhoto.Image = System.Drawing.Image.FromStream(ms);
-                        }
                     }
                     else
                     {
@@ -227,10 +227,9 @@ namespace UI
             using (var openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp";
+
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
                     picPhoto.Image = System.Drawing.Image.FromFile(openFileDialog.FileName);
-                }
             }
         }
 
@@ -286,6 +285,7 @@ namespace UI
                     MessageBox.Show("Выберите продукт для обновления.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
+
                 if (!ValidateInput()) return;
 
                 _selectedProduct.Name = txtName.Text;
@@ -429,6 +429,7 @@ namespace UI
             if (_checkBoxFind.Checked)
             {
                 string searchText = _toolStripTextBoxFind.Text.Trim();
+
                 if (string.IsNullOrWhiteSpace(searchText))
                 {
                     MessageBox.Show("Введите текст для фильтрации.", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Information);

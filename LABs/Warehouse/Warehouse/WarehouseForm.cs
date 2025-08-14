@@ -160,6 +160,7 @@ namespace UI
             {
                 var selectedRow = dataGridViewWarehouses.SelectedRows[0];
                 _selectedWarehouse = selectedRow.DataBoundItem as Warehouse;
+
                 if (_selectedWarehouse != null)
                 {
                     txtName.Text = _selectedWarehouse.Name;
@@ -217,6 +218,7 @@ namespace UI
                     MessageBox.Show("Выберите склад для обновления.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
+
                 if (!ValidateInput()) return;
 
                 _selectedWarehouse.Name = txtName.Text;
@@ -358,6 +360,7 @@ namespace UI
             if (_checkBoxFind.Checked)
             {
                 string searchText = _toolStripTextBoxFind.Text.Trim();
+
                 if (string.IsNullOrWhiteSpace(searchText))
                 {
                     MessageBox.Show("Введите текст для фильтрации.", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -387,6 +390,7 @@ namespace UI
                 MessageBox.Show("Введите название склада.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
+
             return true;
         }
 

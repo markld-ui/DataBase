@@ -53,6 +53,7 @@ namespace UI
         private void TestDatabaseConnection()
         {
             var dbConnection = Application.AppContext.Instance.DatabaseConnection;
+
             if (dbConnection.TestConnection())
             {
                 MessageBox.Show("Подключение к базе данных успешно!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -223,6 +224,7 @@ namespace UI
                 Settings.Default.MainFormLocation = this.Location;
                 Settings.Default.MainFormSize = this.Size;
             }
+
             Settings.Default.Save();
 
             e.Cancel = MessageBox.Show("Вы хотите закрыть программу?", "Внимание", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes;

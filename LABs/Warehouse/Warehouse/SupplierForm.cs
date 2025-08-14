@@ -168,6 +168,7 @@ namespace UI
             {
                 var selectedRow = dataGridViewSuppliers.SelectedRows[0];
                 _selectedSupplier = selectedRow.DataBoundItem as Supplier;
+
                 if (_selectedSupplier != null)
                 {
                     txtCompanyName.Text = _selectedSupplier.CompanyName;

@@ -151,6 +151,7 @@ namespace UI
             try
             {
                 var productAccountings = _productAccountingRepository.GetAll();
+
                 var enrichedData = productAccountings.Select(pa =>
                 {
                     var employee = _employeeRepository.GetById(pa.EmployeeId);
@@ -189,6 +190,7 @@ namespace UI
                     Name = "ProductAccId",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "SupplyId",
@@ -196,6 +198,7 @@ namespace UI
                     Name = "SupplyId",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "EmployeeId",
@@ -203,6 +206,7 @@ namespace UI
                     Name = "EmployeeId",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "EmployeeName",
@@ -210,6 +214,7 @@ namespace UI
                     Name = "EmployeeName",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "EmployeePosition",
@@ -217,6 +222,7 @@ namespace UI
                     Name = "EmployeePosition",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "StorageId",
@@ -224,6 +230,7 @@ namespace UI
                     Name = "StorageId",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "StorageZone",
@@ -231,6 +238,7 @@ namespace UI
                     Name = "StorageZone",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "AccountingDate",
@@ -238,6 +246,7 @@ namespace UI
                     Name = "AccountingDate",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "Quantity",
@@ -245,6 +254,7 @@ namespace UI
                     Name = "Quantity",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "LastMovementDate",
@@ -252,6 +262,7 @@ namespace UI
                     Name = "LastMovementDate",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "DaysSinceAccounting",
@@ -259,6 +270,7 @@ namespace UI
                     Name = "DaysSinceAccounting",
                     ReadOnly = true
                 });
+
                 dataGridViewProductAccountings.Columns.Add(new DataGridViewTextBoxColumn
                 {
                     DataPropertyName = "IsRecentMovement",
@@ -276,6 +288,7 @@ namespace UI
                     DataSource = _movementStatuses,
                     FlatStyle = FlatStyle.Flat
                 };
+
                 dataGridViewProductAccountings.Columns.Add(comboBoxColumn);
 
                 // Привязываем источник данных
@@ -302,9 +315,7 @@ namespace UI
         private void DataGridViewProductAccountings_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {
             if (dataGridViewProductAccountings.IsCurrentCellDirty)
-            {
                 dataGridViewProductAccountings.CommitEdit(DataGridViewDataErrorContexts.Commit);
-            }
         }
 
         /// <summary>
@@ -325,8 +336,8 @@ namespace UI
                     var row = dataGridViewProductAccountings.Rows[e.RowIndex];
                     var productAccId = (int)row.Cells["ProductAccId"].Value;
                     var newStatus = row.Cells["MovementStatus"].Value?.ToString();
-
                     var productAccounting = _productAccountingRepository.GetById(productAccId);
+
                     if (productAccounting != null)
                     {
                         productAccounting.MovementStatus = newStatus;
@@ -419,6 +430,7 @@ namespace UI
                 var selectedRow = dataGridViewProductAccountings.SelectedRows[0];
                 var selectedView = selectedRow.DataBoundItem as ProductAccountingView;
                 _selectedProductAccounting = _productAccountingRepository.GetById(selectedView.ProductAccId);
+
                 if (_selectedProductAccounting != null)
                 {
                     cmbSupply.SelectedValue = _selectedProductAccounting.SupplyId;
@@ -426,6 +438,7 @@ namespace UI
                     cmbStorageZone.SelectedValue = _selectedProductAccounting.StorageId;
                     dtpAccountingDate.Value = _selectedProductAccounting.AccountingDate;
                     txtQuantity.Text = _selectedProductAccounting.Quantity.ToString();
+
                     if (_selectedProductAccounting.LastMovementDate.HasValue)
                     {
                         dtpLastMovementDate.Value = _selectedProductAccounting.LastMovementDate.Value;
@@ -571,6 +584,7 @@ namespace UI
             try
             {
                 var filteredProductAccountings = _productAccountingRepository.GetFiltered(searchText);
+
                 var enrichedData = filteredProductAccountings.Select(pa =>
                 {
                     var employee = _employeeRepository.GetById(pa.EmployeeId);
@@ -630,6 +644,7 @@ namespace UI
             }
 
             string searchText = _toolStripTextBoxFind.Text.Trim();
+
             if (string.IsNullOrWhiteSpace(searchText))
             {
                 MessageBox.Show("Введите текст для поиска.", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -673,6 +688,7 @@ namespace UI
             if (_checkBoxFind.Checked)
             {
                 string searchText = _toolStripTextBoxFind.Text.Trim();
+
                 if (string.IsNullOrWhiteSpace(searchText))
                 {
                     MessageBox.Show("Введите текст для фильтрации.", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Information);

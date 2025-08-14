@@ -144,6 +144,7 @@ namespace UI
             try
             {
                 _allStorageZones = _storageZoneRepository.GetAll();
+
                 var warehouses = _warehouseRepository.GetAll().ToDictionary(w => w.WarehouseId, w => w.Name);
                 _warehouseNames = warehouses;
 
@@ -227,9 +228,11 @@ namespace UI
             {
                 var selectedRow = dataGridViewStorageZones.SelectedRows[0];
                 var viewItem = selectedRow.DataBoundItem as StorageZoneView;
+
                 if (viewItem != null)
                 {
                     _selectedStorageZone = _allStorageZones.FirstOrDefault(sz => sz.StorageId == viewItem.StorageId);
+
                     if (_selectedStorageZone != null)
                     {
                         cmbWarehouse.SelectedValue = _selectedStorageZone.WarehouseId;
@@ -355,6 +358,7 @@ namespace UI
             try
             {
                 var filteredStorageZones = _storageZoneRepository.GetFiltered(searchText);
+
                 var storageZoneView = filteredStorageZones.Select(sz => new StorageZoneView
                 {
                     StorageId = sz.StorageId,
@@ -401,6 +405,7 @@ namespace UI
             }
 
             string searchText = _toolStripTextBoxFind.Text.Trim();
+
             if (string.IsNullOrWhiteSpace(searchText))
             {
                 MessageBox.Show("Введите текст для поиска.", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -444,6 +449,7 @@ namespace UI
             if (_checkBoxFind.Checked)
             {
                 string searchText = _toolStripTextBoxFind.Text.Trim();
+
                 if (string.IsNullOrWhiteSpace(searchText))
                 {
                     MessageBox.Show("Введите текст для фильтрации.", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Information);

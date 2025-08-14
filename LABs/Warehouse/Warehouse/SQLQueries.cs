@@ -69,20 +69,24 @@ namespace UI
         private bool ValidatePositiveInteger(string input, out int value, TextBox textBox, string fieldName)
         {
             value = 0;
+
             if (string.IsNullOrEmpty(input))
             {
                 textBox.BackColor = Color.White;
                 toolTip.SetToolTip(textBox, $"Введите {fieldName} (положительное целое число)");
                 return false;
             }
+
             if (!int.TryParse(input, out value) || value <= 0)
             {
                 textBox.BackColor = Color.LightPink;
                 toolTip.SetToolTip(textBox, $"Некорректный {fieldName}. Введите положительное целое число!");
                 return false;
             }
+
             textBox.BackColor = Color.White;
             toolTip.SetToolTip(textBox, $"Введите {fieldName} (положительное целое число)");
+
             return true;
         }
 
@@ -101,20 +105,24 @@ namespace UI
         private bool ValidateDate(string input, out DateTime value, TextBox textBox, string fieldName)
         {
             value = DateTime.MinValue;
+
             if (string.IsNullOrEmpty(input))
             {
                 textBox.BackColor = Color.White;
                 toolTip.SetToolTip(textBox, $"Введите {fieldName} в формате ДД.ММ.ГГГГ (например, 20.05.2025)");
                 return false;
             }
+
             if (!DateTime.TryParseExact(input, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out value))
             {
                 textBox.BackColor = Color.LightPink;
                 toolTip.SetToolTip(textBox, $"Некорректная {fieldName}. Введите дату в формате ДД.ММ.ГГГГ (например, 20.05.2025)!");
                 return false;
             }
+
             textBox.BackColor = Color.White;
             toolTip.SetToolTip(textBox, $"Введите {fieldName} в формате ДД.ММ.ГГГГ (например, 20.05.2025)");
+
             return true;
         }
 
@@ -201,18 +209,22 @@ namespace UI
                     ValidateDate(textBoxAccountingDate.Text, out _, textBoxAccountingDate, "дата учёта");
                 else
                     textBoxAccountingDate.BackColor = Color.White;
+
                 if (!string.IsNullOrEmpty(textBoxQuantity.Text))
                     ValidatePositiveInteger(textBoxQuantity.Text, out _, textBoxQuantity, "количество");
                 else
                     textBoxQuantity.BackColor = Color.White;
+
                 if (!string.IsNullOrEmpty(textBoxEmployeeIdInput.Text))
                     ValidatePositiveInteger(textBoxEmployeeIdInput.Text, out _, textBoxEmployeeIdInput, "ID сотрудника");
                 else
                     textBoxEmployeeIdInput.BackColor = Color.White;
+
                 if (!string.IsNullOrEmpty(textBoxSupplyIdInput.Text))
                     ValidatePositiveInteger(textBoxSupplyIdInput.Text, out _, textBoxSupplyIdInput, "ID поставки");
                 else
                     textBoxSupplyIdInput.BackColor = Color.White;
+
                 if (!string.IsNullOrEmpty(textBoxStorageId.Text))
                     ValidatePositiveInteger(textBoxStorageId.Text, out _, textBoxStorageId, "ID зоны хранения");
                 else
@@ -244,18 +256,25 @@ namespace UI
         private void UpdateExecuteButtonsState()
         {
             bool isSelectValid = true;
+
             if (radioButtonFilteredSelect.Checked && !ValidatePositiveInteger(textBoxEmployeeId.Text, out _, textBoxEmployeeId, "ID сотрудника"))
                 isSelectValid = false;
             else if (radioButtonAggregateSelect.Checked && !ValidateDate(textBoxStartDate.Text, out _, textBoxStartDate, "начальная дата"))
                 isSelectValid = false;
-            buttonExecuteSelect.Enabled = isSelectValid && (radioButtonSimpleSelect.Checked || radioButtonFilteredSelect.Checked || radioButtonMultiTableSelect.Checked || radioButtonAggregateSelect.Checked);
+
+            buttonExecuteSelect.Enabled = isSelectValid && (radioButtonSimpleSelect.Checked || radioButtonFilteredSelect.Checked || 
+                                                            radioButtonMultiTableSelect.Checked || radioButtonAggregateSelect.Checked);
 
             bool isSubqueryValid = true;
-            if ((radioButtonCorrelatedSubquery.Checked || radioButtonNonCorrelatedSubquery.Checked) && !ValidatePositiveInteger(textBoxSupplyId.Text, out _, textBoxSupplyId, "ID поставки"))
+
+            if ((radioButtonCorrelatedSubquery.Checked || radioButtonNonCorrelatedSubquery.Checked) &&
+                    !ValidatePositiveInteger(textBoxSupplyId.Text, out _, textBoxSupplyId, "ID поставки"))
                 isSubqueryValid = false;
+
             buttonExecuteSubquery.Enabled = isSubqueryValid && (radioButtonCorrelatedSubquery.Checked || radioButtonNonCorrelatedSubquery.Checked);
 
             bool isDMLValid = true;
+
             if (radioButtonInsert.Checked)
             {
                 if (!ValidateDate(textBoxAccountingDate.Text, out _, textBoxAccountingDate, "дата учёта") ||
@@ -263,20 +282,26 @@ namespace UI
                     !ValidatePositiveInteger(textBoxEmployeeIdInput.Text, out _, textBoxEmployeeIdInput, "ID сотрудника") ||
                     !ValidatePositiveInteger(textBoxSupplyIdInput.Text, out _, textBoxSupplyIdInput, "ID поставки") ||
                     !ValidatePositiveInteger(textBoxStorageId.Text, out _, textBoxStorageId, "ID зоны хранения"))
+
                     isDMLValid = false;
             }
             else if (radioButtonUpdate.Checked)
             {
                 if (!ValidatePositiveInteger(textBoxId.Text, out _, textBoxId, "ID записи"))
                     isDMLValid = false;
+
                 if (!string.IsNullOrEmpty(textBoxAccountingDate.Text) && !ValidateDate(textBoxAccountingDate.Text, out _, textBoxAccountingDate, "дата учёта"))
                     isDMLValid = false;
+
                 if (!string.IsNullOrEmpty(textBoxQuantity.Text) && !ValidatePositiveInteger(textBoxQuantity.Text, out _, textBoxQuantity, "количество"))
                     isDMLValid = false;
+
                 if (!string.IsNullOrEmpty(textBoxEmployeeIdInput.Text) && !ValidatePositiveInteger(textBoxEmployeeIdInput.Text, out _, textBoxEmployeeIdInput, "ID сотрудника"))
                     isDMLValid = false;
+
                 if (!string.IsNullOrEmpty(textBoxSupplyIdInput.Text) && !ValidatePositiveInteger(textBoxSupplyIdInput.Text, out _, textBoxSupplyIdInput, "ID поставки"))
                     isDMLValid = false;
+
                 if (!string.IsNullOrEmpty(textBoxStorageId.Text) && !ValidatePositiveInteger(textBoxStorageId.Text, out _, textBoxStorageId, "ID зоны хранения"))
                     isDMLValid = false;
             }
@@ -285,6 +310,7 @@ namespace UI
                 if (!ValidatePositiveInteger(textBoxId.Text, out _, textBoxId, "ID записи"))
                     isDMLValid = false;
             }
+
             buttonExecuteDML.Enabled = isDMLValid && (radioButtonInsert.Checked || radioButtonUpdate.Checked || radioButtonDelete.Checked);
         }
 
@@ -429,6 +455,7 @@ namespace UI
             try
             {
                 UpdateSelectTabControlsState();
+
                 if (radioButtonSimpleSelect.Checked)
                 {
                     dataGridViewSelect.DataSource = _sqlQueriesRepository.GetSimpleProductAccountingRecords();
@@ -437,6 +464,7 @@ namespace UI
                 {
                     if (!ValidatePositiveInteger(textBoxEmployeeId.Text, out int employeeId, textBoxEmployeeId, "ID сотрудника"))
                         return;
+
                     dataGridViewSelect.DataSource = _sqlQueriesRepository.GetRecordsByEmployee(employeeId);
                 }
                 else if (radioButtonMultiTableSelect.Checked)
@@ -447,6 +475,7 @@ namespace UI
                 {
                     if (!ValidateDate(textBoxStartDate.Text, out DateTime startDate, textBoxStartDate, "начальная дата"))
                         return;
+
                     dataGridViewSelect.DataSource = _sqlQueriesRepository.GetAggregateRecords(0, startDate); // 0 для minRecordCount, так как поле удалено
                 }
                 else
@@ -456,6 +485,7 @@ namespace UI
                 }
 
                 LocalizeDataGridViewColumns(dataGridViewSelect);
+
                 if (dataGridViewSelect.Rows.Count == 0)
                 {
                     MessageBox.Show("Записей не найдено!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -535,8 +565,10 @@ namespace UI
         {
             textBoxEmployeeId.Enabled = radioButtonFilteredSelect.Checked;
             textBoxStartDate.Enabled = radioButtonAggregateSelect.Checked;
+
             if (!radioButtonFilteredSelect.Checked)
                 textBoxEmployeeId.Text = string.Empty;
+
             if (!radioButtonAggregateSelect.Checked)
                 textBoxStartDate.Text = string.Empty;
         }
@@ -575,16 +607,19 @@ namespace UI
             try
             {
                 UpdateSubqueryTabControlsState();
+
                 if (radioButtonCorrelatedSubquery.Checked)
                 {
                     if (!ValidatePositiveInteger(textBoxSupplyId.Text, out int supplyId, textBoxSupplyId, "ID поставки"))
                         return;
+
                     dataGridViewSubquery.DataSource = _sqlQueriesRepository.GetCorrelatedSubquery(supplyId);
                 }
                 else if (radioButtonNonCorrelatedSubquery.Checked)
                 {
                     if (!ValidatePositiveInteger(textBoxSupplyId.Text, out int supplyId, textBoxSupplyId, "ID поставки"))
                         return;
+
                     dataGridViewSubquery.DataSource = _sqlQueriesRepository.GetNonCorrelatedSubquery(supplyId);
                 }
                 else
@@ -594,6 +629,7 @@ namespace UI
                 }
 
                 LocalizeDataGridViewColumns(dataGridViewSubquery);
+
                 if (dataGridViewSubquery.Rows.Count == 0)
                 {
                     MessageBox.Show("Записей не найдено!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -644,6 +680,7 @@ namespace UI
         private void UpdateSubqueryTabControlsState()
         {
             textBoxSupplyId.Enabled = radioButtonCorrelatedSubquery.Checked || radioButtonNonCorrelatedSubquery.Checked;
+
             if (!radioButtonCorrelatedSubquery.Checked && !radioButtonNonCorrelatedSubquery.Checked)
                 textBoxSupplyId.Text = string.Empty;
         }
@@ -685,6 +722,7 @@ namespace UI
                         !ValidatePositiveInteger(textBoxEmployeeIdInput.Text, out int employeeId, textBoxEmployeeIdInput, "ID сотрудника") ||
                         !ValidatePositiveInteger(textBoxSupplyIdInput.Text, out int supplyId, textBoxSupplyIdInput, "ID поставки") ||
                         !ValidatePositiveInteger(textBoxStorageId.Text, out int storageId, textBoxStorageId, "ID зоны хранения"))
+
                         return;
 
                     _sqlQueriesRepository.InsertRecord(accountingDate, quantity, employeeId, supplyId, storageId);
@@ -694,6 +732,7 @@ namespace UI
                 {
                     if (!ValidatePositiveInteger(textBoxId.Text, out int id, textBoxId, "ID записи"))
                         return;
+
                     if (!_sqlQueriesRepository.RecordExists(id))
                     {
                         MessageBox.Show($"Запись с ID {id} не существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -710,6 +749,7 @@ namespace UI
                     {
                         if (!ValidateDate(textBoxAccountingDate.Text, out DateTime parsedDate, textBoxAccountingDate, "дата учёта"))
                             return;
+
                         accountingDate = parsedDate;
                     }
 
@@ -717,6 +757,7 @@ namespace UI
                     {
                         if (!ValidatePositiveInteger(textBoxQuantity.Text, out int parsedQuantity, textBoxQuantity, "количество"))
                             return;
+
                         quantity = parsedQuantity;
                     }
 
@@ -724,6 +765,7 @@ namespace UI
                     {
                         if (!ValidatePositiveInteger(textBoxEmployeeIdInput.Text, out int parsedEmployeeId, textBoxEmployeeIdInput, "ID сотрудника"))
                             return;
+
                         employeeId = parsedEmployeeId;
                     }
 
@@ -731,6 +773,7 @@ namespace UI
                     {
                         if (!ValidatePositiveInteger(textBoxSupplyIdInput.Text, out int parsedSupplyId, textBoxSupplyIdInput, "ID поставки"))
                             return;
+
                         supplyId = parsedSupplyId;
                     }
 
@@ -738,6 +781,7 @@ namespace UI
                     {
                         if (!ValidatePositiveInteger(textBoxStorageId.Text, out int parsedStorageId, textBoxStorageId, "ID зоны хранения"))
                             return;
+
                         storageId = parsedStorageId;
                     }
 
@@ -754,6 +798,7 @@ namespace UI
                 {
                     if (!ValidatePositiveInteger(textBoxId.Text, out int id, textBoxId, "ID записи"))
                         return;
+
                     if (!_sqlQueriesRepository.RecordExists(id))
                     {
                         MessageBox.Show($"Запись с ID {id} не существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -859,6 +904,7 @@ namespace UI
 
             if (!radioButtonUpdate.Checked && !radioButtonDelete.Checked)
                 textBoxId.Text = string.Empty;
+
             if (!radioButtonInsert.Checked && !radioButtonUpdate.Checked)
             {
                 textBoxAccountingDate.Text = string.Empty;
@@ -902,6 +948,7 @@ namespace UI
         {
             dataGridViewDML.DataSource = _sqlQueriesRepository.GetAllRecords();
             LocalizeDataGridViewColumns(dataGridViewDML);
+
             if (dataGridViewDML.Rows.Count == 0)
             {
                 MessageBox.Show("Записей не найдено!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -923,29 +970,45 @@ namespace UI
                 switch (column.Name.ToLower())
                 {
                     case "id":
+                    {
                         column.HeaderText = "ID записи";
                         break;
+                    }
                     case "accountingdate":
+                    {
                         column.HeaderText = "Дата учёта";
                         break;
+                    }
                     case "quantity":
+                    {
                         column.HeaderText = "Количество";
                         break;
+                    }
                     case "employeeid":
+                    {
                         column.HeaderText = "ID сотрудника";
                         break;
+                    }
                     case "supplyid":
+                    {   
                         column.HeaderText = "ID поставки";
                         break;
+                    }
                     case "storageid":
+                    {
                         column.HeaderText = "ID зоны хранения";
                         break;
+                    }
                     case "totalquantity":
+                    {
                         column.HeaderText = "Общее количество";
                         break;
+                    }
                     default:
+                    {
                         column.HeaderText = column.Name;
                         break;
+                    }
                 }
             }
         }
